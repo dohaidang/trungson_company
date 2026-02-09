@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  CUSTOMER
+  CONTRACTOR
+}
+
+enum ProductType {
+  SOLID
+  FOUR_HOLE
+  TWO_HOLE
+  BLOCK
+  DECORATIVE
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  DELIVERING
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryMethod {
+  CRANE
+  MANUAL
+}
+
+enum DeliveryStatus {
+  SCHEDULED
+  EN_ROUTE
+  DELIVERED
+  CANCELLED
+}
+
+// Models
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?  @unique
+  password  String?  // Hashed
+  name      String?
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  orders            Order[]
+  contractorProfile ContractorProfile?
+}
+
+model ContractorProfile {
+  id           String @id @default(cuid())
+  userId       String @unique
+  creditLimit  Float  @default(0) // Hạn mức tín dụng
+  paymentTerms String? // Điều khoản thanh toán (VD: Net 30)
+  
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id                 String      @id @default(cuid())
+  name               String
+  slug               String      @unique
+  description        String?
+  type               ProductType
+  dimensions         String?     // e.g., "8x8x18cm"
+  weight             Float?      // kg/viên
+  compressiveStrength Float?     // Mác gạch (Mpa)
+  images             String?     // Stored as JSON string (path array)
+  isPublished        Boolean     @default(true)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  priceTiers PriceTier[]
+  orderItems OrderItem[]
+}
+
+model PriceTier {
+  id          String  @id @default(cuid())
+  productId   String
+  minQuantity Int     @default(0)
+  maxQuantity Int?    // null means infinity
+  unitPrice   Float
+  
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id               String         @id @default(cuid())
+  userId           String
+  status           OrderStatus    @default(PENDING)
+  deliveryMethod   DeliveryMethod @default(CRANE)
+  roadWidthLimit   Float? // mét
+  deliveryAddress  String
+  deliveryLat      Float?
+  deliveryLng      Float?
+  totalAmount      Float
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user       User            @relation(fields: [userId], references: [id])
+  items      OrderItem[]
+  deliveries DeliveryBatch[]
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  unitPrice Float // Snapshot price at time of order
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model DeliveryBatch {
+  id            String         @id @default(cuid())
+  orderId       String
+  scheduledDate DateTime?
+  quantity      Int
+  status        DeliveryStatus @default(SCHEDULED)
+  driverName    String?
+  vehiclePlate  String?
+  breakageCount Int            @default(0)
+  proofImage    String?        // Image URL
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+}
