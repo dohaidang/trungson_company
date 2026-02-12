@@ -1,8 +1,12 @@
 "use client";
 
 import { ShieldCheck, Truck, Lock, FileText } from "lucide-react";
+import { useState } from "react";
+import { OrderFormModal } from "./OrderFormModal";
 
 export function CartSummary() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="w-full lg:w-[400px]">
       <div className="sticky top-24 rounded-sm border border-border bg-card p-6 lg:p-8 shadow-sm">
@@ -33,11 +37,17 @@ export function CartSummary() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3">
-            <button className="group flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-4 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg shadow-primary/20">
+            <button 
+                onClick={() => setIsModalOpen(true)}
+                className="group flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-4 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg shadow-primary/20"
+            >
                 <Lock className="size-4 opacity-70 group-hover:opacity-100 transition-opacity" />
-                Thanh Toán Bảo Mật
+                Gửi Đơn Hàng
             </button>
-            <button className="group flex w-full items-center justify-center gap-2 rounded-sm border border-primary bg-transparent py-4 text-sm font-bold uppercase tracking-widest text-primary transition-all hover:bg-primary/5">
+            <button 
+                onClick={() => setIsModalOpen(true)}
+                className="group flex w-full items-center justify-center gap-2 rounded-sm border border-primary bg-transparent py-4 text-sm font-bold uppercase tracking-widest text-primary transition-all hover:bg-primary/5"
+            >
                 <FileText className="size-4" />
                 Yêu Cầu Báo Giá
             </button>
@@ -60,6 +70,8 @@ export function CartSummary() {
             </div>
         </div>
       </div>
+
+      <OrderFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
