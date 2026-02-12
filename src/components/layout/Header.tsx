@@ -31,9 +31,9 @@ export function Header() {
           >
             Đăng nhập
           </Link>
-          <button className="flex h-10 w-10 items-center justify-center rounded border border-border text-foreground hover:border-primary hover:text-primary transition-colors">
+          <Link href="/cart" className="flex h-10 w-10 items-center justify-center rounded border border-border text-foreground hover:border-primary hover:text-primary transition-colors">
             <ShoppingCart className="size-5" />
-          </button>
+          </Link>
           <button className="md:hidden flex h-10 w-10 items-center justify-center rounded text-foreground">
             <Menu className="size-6" />
           </button>
