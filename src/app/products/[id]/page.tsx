@@ -15,7 +15,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 md:px-10 py-6 md:py-10">
+      <main className="flex-grow w-full mx-auto px-4 md:px-10 py-6 md:py-10">
         
         {/* Breadcrumbs */}
         <div className="flex flex-wrap gap-2 mb-6 text-sm">

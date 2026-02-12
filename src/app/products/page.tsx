@@ -7,7 +7,7 @@ import { Pagination } from "@/components/ui/pagination";
 export default function ProductsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <div className="mx-auto w-full max-w-[1440px] px-4 md:px-8 lg:px-12 py-6">
+      <div className="mx-auto w-full px-4 md:px-8 lg:px-12 py-6">
         
         {/* Breadcrumbs */}
         <div className="flex flex-wrap gap-2 py-4 items-center text-sm">

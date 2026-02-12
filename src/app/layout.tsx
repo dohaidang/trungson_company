@@ -29,9 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
       >
-        <div className="relative flex min-h-screen flex-col">
+        <div className="relative flex min-h-screen flex-col w-full overflow-x-hidden">
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 w-full">{children}</main>
           <Footer />
         </div>
       </body>

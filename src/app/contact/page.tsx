@@ -6,7 +6,7 @@ import { ShieldCheck, Truck, Factory, CreditCard } from "lucide-react";
 export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <main className="mx-auto max-w-[1280px] w-full px-4 py-16 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full px-4 py-16 sm:px-6 lg:px-8">
         
         {/* Intro Section */}
         <div className="mb-16 text-center">
@@ -31,7 +31,7 @@ export default function ContactPage() {
 
       {/* Features Highlights */}
       <section className="bg-muted/40 py-12">
-        <div className="mx-auto max-w-[1280px] px-4">
+        <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <FeatureItem 
                 icon={<ShieldCheck className="size-10 text-muted-foreground" />}

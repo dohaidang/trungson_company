@@ -31,7 +31,7 @@ export default function Home() {
                <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/70" />
             </div>
 
-            <div className="relative z-10 flex w-full max-w-[960px] flex-col items-center gap-6 px-4 text-center">
+            <div className="relative z-10 flex w-full flex-col items-center gap-6 px-4 text-center">
               <div className="flex flex-col gap-4">
                 <h1 className="text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl md:text-6xl drop-shadow-lg">
                   Xây vững niềm tin <br/><span className="text-primary-foreground/90">Dựng bền mái ấm</span>
@@ -55,8 +55,8 @@ export default function Home() {
         </section>
 
         {/* --- CELL 3: Features Section --- */}
-        <section className="w-full py-16 px-4 bg-background">
-          <div className="mx-auto max-w-[1280px]">
+        <section className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-background">
+          <div className="mx-auto w-full">
             <div className="flex flex-col gap-12">
               <div className="flex flex-col gap-2 text-center sm:text-left">
                 <h2 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl">
@@ -111,7 +111,7 @@ export default function Home() {
 
         {/* --- CELL 4: Featured Products --- */}
         <section className="w-full bg-secondary/30 py-20" id="products">
-          <div className="mx-auto max-w-[1280px] px-4">
+          <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
             <div className="mb-10 flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-end">
               <div className="text-center sm:text-left">
                 <h2 className="text-3xl font-bold leading-tight text-foreground">Sản Phẩm Bán Chạy</h2>
@@ -244,7 +244,7 @@ export default function Home() {
 
         {/* --- CELL 5: Calculator Widget --- */}
         <section className="w-full bg-muted/30 py-20" id="calculator">
-          <div className="mx-auto max-w-[960px] px-4">
+          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-8 rounded-none border border-border bg-card shadow-xl md:flex-row md:items-stretch md:p-0 overflow-hidden">
               {/* Left: Info & Image */}
               <div className="relative flex flex-col justify-center p-8 text-white md:w-1/3">
