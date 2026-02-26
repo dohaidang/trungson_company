@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Eye, ShoppingCart } from "lucide-react";
+import { Heart, Eye, ShoppingCart, Check } from "lucide-react";
+import { useCart } from "@/lib/CartContext";
+import { useState } from "react";
 
 interface ProductCardProps {
   id: string;
@@ -8,7 +12,7 @@ interface ProductCardProps {
   description: string;
   price: number;
   originalPrice?: number;
-  image: string; // URL from Google LH3
+  image: string;
   badges?: { text: string; color: "red" | "gray" }[];
   rating?: number;
 }
@@ -22,6 +26,23 @@ export function ProductCard({
   image,
   badges = [],
 }: ProductCardProps) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({
+      id,
+      name,
+      spec: description.slice(0, 50),
+      price,
+      image,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
+
   return (
     <div className="group flex flex-col bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 rounded overflow-hidden">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
@@ -60,8 +81,6 @@ export function ProductCard({
       </div>
 
       <div className="p-5 flex flex-col flex-1">
-        {/* Tags/Categories placeholder if needed */}
-        
         <Link href={`/products/${id}`}>
             <h3 className="text-foreground text-lg font-bold leading-tight mb-2 group-hover:text-primary transition-colors">
             {name}
@@ -85,8 +104,15 @@ export function ProductCard({
                 </span>
             </div>
           </div>
-          <button className="bg-primary hover:bg-primary/90 text-primary-foreground p-2 transition-colors flex items-center justify-center w-10 h-10 rounded-sm">
-            <ShoppingCart className="size-5" />
+          <button
+            onClick={handleAddToCart}
+            className={`p-2 transition-all flex items-center justify-center w-10 h-10 rounded-sm ${
+              added
+                ? "bg-green-600 text-white scale-110"
+                : "bg-primary hover:bg-primary/90 text-primary-foreground"
+            }`}
+          >
+            {added ? <Check className="size-5" /> : <ShoppingCart className="size-5" />}
           </button>
         </div>
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Info, Minus, Plus, ShoppingCart, Download } from "lucide-react";
+import { Info, Minus, Plus, ShoppingCart, Download, Check } from "lucide-react";
+import { useCart } from "@/lib/CartContext";
 
 interface ProductInfoProps {
   sku: string;
@@ -10,6 +11,7 @@ interface ProductInfoProps {
   price: number;
   unit: string;
   coverage?: string;
+  image?: string;
 }
 
 export function ProductInfo({
@@ -19,8 +21,24 @@ export function ProductInfo({
   price,
   unit,
   coverage,
+  image,
 }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1000);
+  const [added, setAdded] = useState(false);
+  const { addItem } = useCart();
+
+  const handleAddToCart = () => {
+    addItem({
+      id: sku,
+      name,
+      spec: `${unit} • SKU: ${sku}`,
+      price,
+      image: image || "",
+      quantity,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -50,7 +68,7 @@ export function ProductInfo({
           <div className="bg-muted/50 p-3 rounded-lg border border-border flex gap-2 items-start">
             <Info className="text-muted-foreground mt-0.5 size-5 flex-shrink-0" />
             <p className="text-sm text-muted-foreground">
-              {coverage} <a href="#" className="underline hover:text-primary transition-colors">Tính toán số lượng</a>
+              {coverage} <a href="/#calculator" className="underline hover:text-primary transition-colors">Tính toán số lượng</a>
             </p>
           </div>
         )}
@@ -62,7 +80,7 @@ export function ProductInfo({
         <div className="flex flex-col sm:flex-row gap-4 items-stretch">
           <div className="flex items-center rounded-lg border border-border bg-card overflow-hidden w-full sm:w-auto">
             <button
-              onClick={() => setQuantity(Math.max(0, quantity - 100))}
+              onClick={() => setQuantity(Math.max(1, quantity - 100))}
               className="px-3 py-3 hover:bg-muted transition-colors text-foreground"
             >
               <Minus className="size-4" />
@@ -71,7 +89,10 @@ export function ProductInfo({
               className="w-24 text-center border-none focus:ring-0 p-0 text-foreground bg-transparent font-medium outline-none"
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (!isNaN(val) && val > 0) setQuantity(val);
+              }}
             />
             <button
               onClick={() => setQuantity(quantity + 100)}
@@ -81,17 +102,32 @@ export function ProductInfo({
             </button>
           </div>
           <div className="flex-1 flex flex-col justify-center text-sm text-muted-foreground px-2">
-             {/* Calculations can be added here later */}
             <span>Tổng Diện Tích: <strong className="text-foreground">~{(quantity / 55).toFixed(1)} m²</strong></span>
-            <span>Tổng Trọng Lượng: <strong className="text-foreground">{(quantity * 2.2).toLocaleString()} kg</strong></span>
+            <span>Thành Tiền: <strong className="text-primary">{(quantity * price).toLocaleString()}₫</strong></span>
           </div>
         </div>
 
         {/* Buttons */}
         <div className="flex flex-col gap-3">
-          <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 px-6 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 text-lg">
-            <ShoppingCart className="size-5" />
-            Thêm Vào Báo Giá
+          <button
+            onClick={handleAddToCart}
+            className={`w-full font-bold py-4 px-6 rounded-lg shadow-lg transition-all flex items-center justify-center gap-2 text-lg ${
+              added
+                ? "bg-green-600 text-white shadow-green-600/20"
+                : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/20"
+            }`}
+          >
+            {added ? (
+              <>
+                <Check className="size-5" />
+                Đã Thêm Vào Giỏ Hàng!
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="size-5" />
+                Thêm Vào Giỏ Hàng
+              </>
+            )}
           </button>
           <button className="w-full bg-transparent border border-border hover:border-primary hover:text-primary text-foreground font-medium py-3 px-6 rounded-lg transition-all flex items-center justify-center gap-2">
             <Download className="size-5" />
