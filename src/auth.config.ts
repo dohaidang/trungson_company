@@ -7,15 +7,31 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-            if (isOnDashboard) {
+            const pathname = nextUrl.pathname;
+
+            // Protect /admin routes — require ADMIN role
+            if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/preview')) {
+                if (!isLoggedIn) return false;
+                const role = (auth?.user as { role?: string })?.role;
+                if (role !== 'ADMIN') {
+                    return Response.redirect(new URL('/dashboard', nextUrl));
+                }
+                return true;
+            }
+
+            // Protect /dashboard routes — require login
+            if (pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/preview')) {
                 if (isLoggedIn) return true;
-                return false; // Redirect unauthenticated users to login page
-            } else if (isLoggedIn && (nextUrl.pathname === '/login' || nextUrl.pathname === '/register')) {
+                return false;
+            }
+
+            // Redirect logged-in users away from auth pages
+            if (isLoggedIn && (pathname === '/login' || pathname === '/register')) {
                 return Response.redirect(new URL('/dashboard', nextUrl));
             }
+
             return true;
         },
     },
-    providers: [], // Add providers with an empty array for now
+    providers: [],
 } satisfies NextAuthConfig;

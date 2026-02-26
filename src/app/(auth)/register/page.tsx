@@ -1,10 +1,57 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { User, Building2, Phone, Mail, Lock, Check, ShieldCheck } from "lucide-react";
+import { User, Building2, Phone, Mail, Lock, ShieldCheck, Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (password !== confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Đã có lỗi xảy ra");
+        setLoading(false);
+        return;
+      }
+
+      // Success — redirect to login
+      router.push("/login?registered=true");
+    } catch {
+      setError("Không thể kết nối server. Vui lòng thử lại.");
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       {/* Left Side: Industrial Imagery */}
@@ -46,7 +93,13 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          {error && (
+            <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive font-medium">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Full Name */}
               <div className="space-y-1.5">
@@ -58,6 +111,7 @@ export default function RegisterPage() {
                     <User className="size-5" />
                   </div>
                   <input
+                    name="name"
                     type="text"
                     required
                     className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-sm text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
@@ -97,8 +151,8 @@ export default function RegisterPage() {
                   <Phone className="size-5" />
                 </div>
                 <input
+                  name="phone"
                   type="tel"
-                  required
                   className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-sm text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                   placeholder="090 000 0000"
                 />
@@ -115,6 +169,7 @@ export default function RegisterPage() {
                   <Mail className="size-5" />
                 </div>
                 <input
+                  name="email"
                   type="email"
                   required
                   className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-sm text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
@@ -134,8 +189,10 @@ export default function RegisterPage() {
                     <Lock className="size-5" />
                   </div>
                   <input
+                    name="password"
                     type="password"
                     required
+                    minLength={6}
                     className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-sm text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                     placeholder="••••••••"
                   />
@@ -152,8 +209,10 @@ export default function RegisterPage() {
                     <ShieldCheck className="size-5" />
                   </div>
                   <input
+                    name="confirmPassword"
                     type="password"
                     required
+                    minLength={6}
                     className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-sm text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                     placeholder="••••••••"
                   />
@@ -189,9 +248,17 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 px-6 rounded-sm shadow-lg shadow-primary/20 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2 group"
+              disabled={loading}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 px-6 rounded-sm shadow-lg shadow-primary/20 transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2 group disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Đăng ký ngay
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Đang xử lý...
+                </>
+              ) : (
+                "Đăng ký ngay"
+              )}
             </button>
 
             {/* Alternate Login */}
@@ -215,10 +282,10 @@ export default function RegisterPage() {
               <Link href="#" className="hover:text-primary transition-colors">
                 Hỗ trợ
               </Link>
-              <Link href="#" className="hover:text-primary transition-colors">
+              <Link href="/about" className="hover:text-primary transition-colors">
                 Về chúng tôi
               </Link>
-              <Link href="#" className="hover:text-primary transition-colors">
+              <Link href="/projects" className="hover:text-primary transition-colors">
                 Công trình
               </Link>
             </div>

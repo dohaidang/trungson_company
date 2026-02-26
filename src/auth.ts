@@ -37,7 +37,15 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
                     const passwordsMatch = await bcrypt.compare(password, user.password);
 
-                    if (passwordsMatch) return user;
+                    if (passwordsMatch) {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            role: user.role,
+                            image: user.image,
+                        };
+                    }
                 }
 
                 console.log('Invalid credentials');
@@ -45,6 +53,25 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             },
         }),
     ],
+    callbacks: {
+        ...authConfig.callbacks,
+        async jwt({ token, user }) {
+            // On sign in, add role and id to the token
+            if (user) {
+                token.id = user.id;
+                token.role = (user as { role?: string }).role;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            // Pass id and role from token to session
+            if (session.user) {
+                session.user.id = token.id as string;
+                (session.user as { role?: string }).role = token.role as string;
+            }
+            return session;
+        },
+    },
 });
 
 export const { GET, POST } = handlers;

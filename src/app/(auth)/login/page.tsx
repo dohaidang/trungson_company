@@ -1,12 +1,49 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { User, Lock, Eye, EyeOff, Home } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Home, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("identity") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Email hoặc mật khẩu không chính xác");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Không thể kết nối server. Vui lòng thử lại.");
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -53,8 +90,20 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {registered && (
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-700 font-medium">
+              Đăng ký thành công! Vui lòng đăng nhập.
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive font-medium">
+              {error}
+            </div>
+          )}
+
           {/* Form Section */}
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="identity"
@@ -138,9 +187,17 @@ export default function LoginPage() {
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-sm text-sm font-bold uppercase tracking-widest text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all shadow-lg shadow-primary/20"
+                disabled={loading}
+                className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-sm text-sm font-bold uppercase tracking-widest text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all shadow-lg shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Đăng Nhập
+                {loading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin mr-2" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  "Đăng Nhập"
+                )}
               </button>
             </div>
           </form>
