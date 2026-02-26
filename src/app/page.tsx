@@ -4,10 +4,10 @@ import { StatsCounter } from "@/components/home/StatsCounter";
 import { PartnersMarquee } from "@/components/home/PartnersMarquee";
 import { Testimonials } from "@/components/home/Testimonials";
 import { CTABanner } from "@/components/home/CTABanner";
+import { Calculator } from "@/components/home/Calculator";
 import Link from "next/link";
 import { 
   ArrowRight, 
-  Calculator, 
   Truck, 
   Tag, 
   ShieldCheck, 
@@ -254,73 +254,7 @@ export default function Home() {
         </section>
 
         {/* --- CELL 5: Calculator Widget --- */}
-        <section className="w-full bg-muted/30 py-20" id="calculator">
-          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-8 rounded-none border border-border bg-card shadow-xl md:flex-row md:items-stretch md:p-0 overflow-hidden">
-              {/* Left: Info & Image */}
-              <div className="relative flex flex-col justify-center p-8 text-white md:w-1/3">
-                 <Image 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbAP2lKJ7BC25G14XiZSsAp5ooblqYdTqq-zLA4_PHWPutdZ18C923BLZA25Hl3fmkYnjVCa4B18xlEQsTjLzacK_wcBjmetjGT-LK-pP2YO6gApfJtPzYBjtRRklBOnnobtkfHhZi91GnIH6G97SMnCkZYD4JST3cFi3iGzIStC8aJo0HDJux-oojR_8g50spmxKhXX4NYl6Tm7sysT3e6GpkiJL_uANFqFAJiltVNSRqxWj_zSTjJIYuZNM898Mi4JFd2eZRD8Y"
-                    alt="Calculator Background"
-                    fill
-                    className="object-cover"
-                 />
-                 <div className="absolute inset-0 bg-[#2a1d1b]/90" />
-                 
-                 <div className="relative z-10">
-                    <div className="mb-4 text-primary">
-                      <Calculator className="size-12" />
-                    </div>
-                    <h2 className="mb-2 text-2xl font-black uppercase tracking-tight">Tính Dự Toán</h2>
-                    <p className="text-sm font-light text-gray-300">Lên kế hoạch ngân sách chính xác. Nhập kích thước để ước tính số lượng gạch cần thiết ngay lập tức.</p>
-                 </div>
-              </div>
-
-              {/* Right: Form */}
-              <div className="flex flex-1 flex-col gap-6 p-8 md:p-10">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Diện Tích (m²)</label>
-                    <div className="relative">
-                      <input 
-                        className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm font-medium text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none" 
-                        placeholder="VD: 50" 
-                        type="number"
-                      />
-                      <span className="absolute right-4 top-3 text-sm text-muted-foreground">m²</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Loại Gạch</label>
-                    <div className="relative">
-                      <select className="w-full appearance-none rounded-sm border border-input bg-background px-4 py-3 text-sm font-medium text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none cursor-pointer">
-                        <option>Gạch Tuynel (Tiêu chuẩn)</option>
-                        <option>Gạch Block 4 Lỗ</option>
-                        <option>Gạch Đỏ Đặc</option>
-                        <option>Gạch Vỉa Hè</option>
-                      </select>
-                      <span className="pointer-events-none absolute right-4 top-3 text-muted-foreground">
-                        <ChevronDown className="size-5" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="h-px w-full bg-border"></div>
-                
-                <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold uppercase text-muted-foreground">Số Lượng Ước Tính</span>
-                    <span className="text-3xl font-black text-foreground">0 <span className="text-base font-normal text-muted-foreground">viên</span></span>
-                  </div>
-                  <button className="flex h-12 w-full sm:w-auto min-w-[180px] items-center justify-center gap-2 rounded-sm bg-primary px-6 font-bold uppercase tracking-wide text-primary-foreground transition-all hover:bg-primary/90 shadow-lg shadow-primary/20">
-                      Tính Ngay
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <Calculator />
 
         {/* --- CELL 6: Partners Marquee --- */}
         <PartnersMarquee />
