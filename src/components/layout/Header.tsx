@@ -39,8 +39,9 @@ export function Header() {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
             <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">Trang Chủ</Link>
+            <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">Giới Thiệu</Link>
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Sản Phẩm</Link>
-            <Link href="/#calculator" className="text-sm font-medium hover:text-primary transition-colors">Tính Dự Toán</Link>
+            <Link href="/projects" className="text-sm font-medium hover:text-primary transition-colors">Dự Án</Link>
             <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">Liên Hệ</Link>
           </nav>
 
@@ -139,6 +140,13 @@ export function Header() {
             Trang Chủ
           </Link>
           <Link
+            href="/about"
+            onClick={() => setIsMenuOpen(false)}
+            className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+          >
+            Giới Thiệu
+          </Link>
+          <Link
             href="/products"
             onClick={() => setIsMenuOpen(false)}
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
@@ -146,11 +154,11 @@ export function Header() {
             Sản Phẩm
           </Link>
           <Link
-            href="/#calculator"
+            href="/projects"
             onClick={() => setIsMenuOpen(false)}
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
           >
-            Tính Dự Toán
+            Dự Án
           </Link>
           <Link
             href="/contact"
