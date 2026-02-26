@@ -1,5 +1,9 @@
 import Image from "next/image";
 import { FeaturedProjects } from "@/components/home/FeaturedProjects";
+import { StatsCounter } from "@/components/home/StatsCounter";
+import { PartnersMarquee } from "@/components/home/PartnersMarquee";
+import { Testimonials } from "@/components/home/Testimonials";
+import { CTABanner } from "@/components/home/CTABanner";
 import Link from "next/link";
 import { 
   ArrowRight, 
@@ -54,6 +58,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* --- CELL 2.5: Stats Counter --- */}
+        <StatsCounter />
 
         {/* --- CELL 3: Features Section --- */}
         <section className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-background">
@@ -314,6 +321,15 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* --- CELL 6: Partners Marquee --- */}
+        <PartnersMarquee />
+
+        {/* --- CELL 7: Testimonials --- */}
+        <Testimonials />
+
+        {/* --- CELL 8: CTA Banner --- */}
+        <CTABanner />
       </main>
     </div>
   );
