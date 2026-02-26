@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { FeaturedProjects } from "@/components/home/FeaturedProjects";
 import Link from "next/link";
 import { 
   ArrowRight, 
@@ -108,6 +109,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* --- CELL 3.5: Featured Projects --- */}
+        <FeaturedProjects />
 
         {/* --- CELL 4: Featured Products --- */}
         <section className="w-full bg-secondary/30 py-20" id="products">
