@@ -198,6 +198,9 @@ export async function getAdminProducts() {
             price: p.priceTiers[0]?.unitPrice || 0,
             isPublished: p.isPublished,
             totalSold: p._count.orderItems,
+            stock: p.stock,
+            application: p.application ? JSON.parse(p.application) : [],
+            dimensions: p.dimensions || '',
         }));
 
         return { products: serialized, error: null };
@@ -473,6 +476,8 @@ const productSchema = z.object({
     isPublished: z.boolean().default(true),
     priceTiers: z.array(priceTierSchema).min(1, 'Cần ít nhất 1 mức giá'),
     images: z.array(z.string()).optional().default([]),
+    application: z.array(z.string()).optional().default([]),
+    stock: z.number().int().min(0).default(0),
 });
 
 // Helper: generate slug from name
@@ -504,6 +509,18 @@ export async function getProductForEdit(productId: string) {
             return { product: null, error: 'Sản phẩm không tồn tại' };
         }
 
+        let parsedImages: string[] = [];
+        if (product.images) {
+            try {
+                const parsed = JSON.parse(product.images);
+                if (Array.isArray(parsed)) {
+                    parsedImages = parsed;
+                }
+            } catch (e) {
+                console.error('Failed to parse images JSON for product', product.id);
+            }
+        }
+
         return {
             product: {
                 id: product.id,
@@ -515,7 +532,9 @@ export async function getProductForEdit(productId: string) {
                 weight: product.weight,
                 compressiveStrength: product.compressiveStrength,
                 isPublished: product.isPublished,
-                images: product.images ? JSON.parse(product.images) : [],
+                images: parsedImages,
+                application: product.application ? JSON.parse(product.application) : [],
+                stock: product.stock,
                 priceTiers: product.priceTiers.map(t => ({
                     id: t.id,
                     minQuantity: t.minQuantity,
@@ -574,6 +593,7 @@ export async function createProduct(data: {
                     weight: validated.weight ?? null,
                     compressiveStrength: validated.compressiveStrength ?? null,
                     isPublished: validated.isPublished,
+                    images: JSON.stringify(validated.images),
                 },
             });
 
@@ -650,6 +670,7 @@ export async function updateProduct(productId: string, data: {
                     weight: validated.weight ?? null,
                     compressiveStrength: validated.compressiveStrength ?? null,
                     isPublished: validated.isPublished,
+                    images: JSON.stringify(validated.images),
                 },
             });
 

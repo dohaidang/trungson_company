@@ -1,9 +1,66 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
+import { X } from "lucide-react";
+
+const TYPES = [
+  { value: "SOLID", label: "Gạch Đặc" },
+  { value: "FOUR_HOLE", label: "Gạch 4 Lỗ" },
+  { value: "TWO_HOLE", label: "Gạch 2 Lỗ" },
+  { value: "BLOCK", label: "Gạch Block" },
+  { value: "DECORATIVE", label: "Gạch Trang Trí" },
+];
+
+const APPLICATIONS = [
+  "Xây tường",
+  "Ốp tường",
+  "Lát nền",
+  "Trang trí",
+  "Hạ tầng (vỉa hè)",
+  "Đổ móng"
+];
 
 export function ProductFilter() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Parse current params
+  const currentTypes = searchParams.get("type")?.split(",") || [];
+  const currentApps = searchParams.get("applications")?.split(",") || [];
+  const inStock = searchParams.get("inStock") === "true";
+  const maxPriceParam = searchParams.get("maxPrice");
+  const maxPrice = maxPriceParam ? parseInt(maxPriceParam) : 50000;
+
+  // Function to create new query string 
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) {
+        params.set(name, value);
+      } else {
+        params.delete(name);
+      }
+      return params.toString();
+    },
+    [searchParams]
+  );
+
+  const toggleArrayParam = (paramName: string, value: string, currentArray: string[]) => {
+    let newArray = [...currentArray];
+    if (newArray.includes(value)) {
+      newArray = newArray.filter(i => i !== value);
+    } else {
+      newArray.push(value);
+    }
+    
+    router.replace(`?${createQueryString(paramName, newArray.join(","))}`, { scroll: false });
+  };
+
+  const clearAllFilters = () => {
+    router.replace("?", { scroll: false });
+  };
+
   return (
     <aside className="w-full lg:w-64 flex-shrink-0">
       <div className="bg-card border border-border p-6 sticky top-24 rounded-sm">
@@ -11,54 +68,73 @@ export function ProductFilter() {
           <h3 className="text-lg font-bold text-foreground uppercase tracking-wide">
             Bộ Lọc
           </h3>
-          <button className="text-xs text-muted-foreground hover:text-primary underline">
-            Xóa tất cả
-          </button>
+          {(currentTypes.length > 0 || currentApps.length > 0 || inStock || maxPrice !== 50000) && (
+            <button onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+              <X className="w-3 h-3" /> Xóa lọc
+            </button>
+          )}
         </div>
-
-        {/* Color Filter */}
-        <FilterSection title="Màu Sắc">
-          <CheckboxItem label="Đỏ Đất Nung" count={124} defaultChecked />
-          <CheckboxItem label="Kem / Be" count={45} />
-          <CheckboxItem label="Xám Đá" count={32} />
-          <CheckboxItem label="Hỗn Hợp" count={18} />
-        </FilterSection>
-
-        <Separator />
 
         {/* Type Filter */}
         <FilterSection title="Loại Gạch">
-          <CheckboxItem label="Gạch Đặc" />
-          <CheckboxItem label="Gạch 2 Lỗ" defaultChecked />
-          <CheckboxItem label="Gạch 4 Lỗ" />
-          <CheckboxItem label="Gạch Lát Sân" />
+          {TYPES.map(type => (
+            <CheckboxItem 
+              key={type.value}
+              label={type.label} 
+              checked={currentTypes.includes(type.value)}
+              onChange={() => toggleArrayParam("type", type.value, currentTypes)}
+            />
+          ))}
         </FilterSection>
 
         <Separator />
 
-        {/* Surface Filter */}
-        <FilterSection title="Bề Mặt">
-            <CheckboxItem label="Nhám" />
-            <CheckboxItem label="Bóng" />
-            <CheckboxItem label="Sần Sùi" />
+        {/* Application Filter */}
+        <FilterSection title="Ứng Dụng">
+          {APPLICATIONS.map(app => (
+            <CheckboxItem 
+              key={app}
+              label={app} 
+              checked={currentApps.includes(app)}
+              onChange={() => toggleArrayParam("applications", app, currentApps)}
+            />
+          ))}
+        </FilterSection>
+
+        <Separator />
+
+        {/* Stock Filter */}
+        <FilterSection title="Tình Trạng">
+          <CheckboxItem 
+              label="Chỉ hiện Còn Bán / Có Tồn Khi" 
+              checked={inStock}
+              onChange={(e) => {
+                router.replace(`?${createQueryString("inStock", e.target.checked ? "true" : "")}`, { scroll: false });
+              }}
+            />
         </FilterSection>
 
         <Separator />
 
         {/* Price Filter */}
         <div className="mb-8">
-            <h4 className="text-sm font-bold text-foreground mb-4">Khoảng Giá</h4>
+            <h4 className="text-sm font-bold text-foreground mb-4">Mức Giá Tối Đa</h4>
             <div className="px-2">
                 <input 
                     type="range" 
-                    min="0" 
-                    max="100" 
-                    defaultValue="40"
+                    min="1000" 
+                    max="100000" 
+                    step="1000"
+                    value={maxPrice}
+                    onChange={(e) => {
+                      // Apply visually instantly, could add debounce
+                      router.replace(`?${createQueryString("maxPrice", e.target.value)}`, { scroll: false });
+                    }}
                     className="w-full h-1 bg-muted rounded-lg appearance-none cursor-pointer accent-primary" 
                 />
                 <div className="flex justify-between mt-3 text-xs text-muted-foreground font-medium">
                     <span>1.000₫</span>
-                    <span>50.000₫+</span>
+                    <span>{maxPrice >= 100000 ? "100.000₫+" : `${maxPrice.toLocaleString("vi-VN")}₫`}</span>
                 </div>
             </div>
         </div>
@@ -67,13 +143,7 @@ export function ProductFilter() {
   );
 }
 
-function FilterSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function FilterSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
       <h4 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
@@ -86,20 +156,21 @@ function FilterSection({
 
 function CheckboxItem({
   label,
-  count,
-  defaultChecked,
+  checked,
+  onChange,
 }: {
   label: string;
-  count?: number;
-  defaultChecked?: boolean;
+  checked: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <label className="flex items-center gap-3 cursor-pointer group">
       <div className="relative flex items-center">
         <input
           type="checkbox"
-          defaultChecked={defaultChecked}
-          className="peer h-5 w-5 appearance-none border border-input rounded-sm bg-background checked:bg-primary checked:border-primary transition-all"
+          checked={checked}
+          onChange={onChange}
+          className="peer h-5 w-5 appearance-none border border-input rounded-sm bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer"
         />
         <svg
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary-foreground opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"
@@ -114,11 +185,6 @@ function CheckboxItem({
       <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors select-none">
         {label}
       </span>
-      {count !== undefined && (
-        <span className="ml-auto text-xs text-muted-foreground/60">
-          ({count})
-        </span>
-      )}
     </label>
   );
 }

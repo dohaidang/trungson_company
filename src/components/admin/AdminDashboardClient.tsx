@@ -67,6 +67,9 @@ interface ProductData {
   price: number;
   isPublished: boolean;
   totalSold: number;
+  stock: number;
+  application: string[];
+  dimensions: string;
 }
 
 interface UserData {
@@ -629,10 +632,36 @@ function OrdersTab({ orders }: { orders: OrderData[] }) {
 /* ============================== */
 function ProductsTab({ products }: { products: ProductData[] }) {
   const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPrice, setFilterPrice] = useState("all");
+  const [filterDimension, setFilterDimension] = useState("");
+  const [filterApp, setFilterApp] = useState("all");
   const [isPending, startTransition] = useTransition();
   const [actionMsg, setActionMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const filtered = products.filter((p) => search === "" || p.name.toLowerCase().includes(search.toLowerCase()));
+  // Extract unique applications for dropdown
+  const allApplications = Array.from(new Set(products.flatMap(p => p.application || [])));
+
+  const filtered = products
+    .filter((p) => search === "" || p.name.toLowerCase().includes(search.toLowerCase()))
+    .filter((p) => filterType === "all" || p.type === filterType)
+    .filter((p) => {
+      if (filterStatus === "published") return p.isPublished;
+      if (filterStatus === "hidden") return !p.isPublished;
+      if (filterStatus === "out_of_stock") return p.stock <= 0;
+      return true;
+    })
+    .filter((p) => {
+      if (filterPrice === "all") return true;
+      if (filterPrice === "0-1000") return p.price < 1000;
+      if (filterPrice === "1000-2000") return p.price >= 1000 && p.price < 2000;
+      if (filterPrice === "2000-5000") return p.price >= 2000 && p.price < 5000;
+      if (filterPrice === "5000-") return p.price >= 5000;
+      return true;
+    })
+    .filter((p) => filterDimension === "" || (p.dimensions && p.dimensions.toLowerCase().includes(filterDimension.toLowerCase())))
+    .filter((p) => filterApp === "all" || (p.application && p.application.includes(filterApp)));
 
   const handleTogglePublish = (productId: string) => {
     startTransition(async () => {
@@ -665,16 +694,75 @@ function ProductsTab({ products }: { products: ProductData[] }) {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-          <input type="text" placeholder="Tìm sản phẩm..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-start sm:items-center justify-between">
+          <div className="flex flex-1 flex-wrap gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 min-w-[200px] max-w-[280px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <input type="text" placeholder="Tìm tên sản phẩm..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-white pl-10 pr-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+            </div>
+            
+            <div className="relative min-w-[150px] max-w-[220px]">
+              <input type="text" placeholder="Kích thước (vd: 190x90)..." value={filterDimension} onChange={(e) => setFilterDimension(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+            </div>
+
+            {/* Lọc Thể Loại */}
+            <select 
+              value={filterType} 
+              onChange={(e) => setFilterType(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="all">Loại (Tất cả)</option>
+              {Object.entries(typeLabels).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+
+            {/* Lọc Ứng Dụng */}
+            <select 
+              value={filterApp} 
+              onChange={(e) => setFilterApp(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="all">Ứng dụng (Tất cả)</option>
+              {allApplications.map((app) => (
+                <option key={app} value={app}>{app}</option>
+              ))}
+            </select>
+
+            {/* Lọc Giá */}
+            <select 
+              value={filterPrice} 
+              onChange={(e) => setFilterPrice(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="all">Mức giá (Tất cả)</option>
+              <option value="0-1000">Dưới 1.000đ</option>
+              <option value="1000-2000">1.000đ - 2.000đ</option>
+              <option value="2000-5000">2.000đ - 5.000đ</option>
+              <option value="5000-">Trên 5.000đ</option>
+            </select>
+
+            {/* Lọc Trạng Thái */}
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="all">Trạng thái (Tất cả)</option>
+              <option value="published">Đang bán</option>
+              <option value="hidden">Đang ẩn</option>
+              <option value="out_of_stock">Hết hàng</option>
+            </select>
+          </div>
+
+          <Link href="/admin/products/new"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm shrink-0 whitespace-nowrap">
+            <Plus className="size-4" /> Thêm SP
+          </Link>
         </div>
-        <Link href="/admin/products/new"
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm shrink-0 whitespace-nowrap">
-          <Plus className="size-4" /> Thêm Sản Phẩm
-        </Link>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">

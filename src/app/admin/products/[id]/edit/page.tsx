@@ -7,8 +7,9 @@ export const metadata: Metadata = {
   title: "Chỉnh Sửa Sản Phẩm | Admin",
 };
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
-  const { product, error } = await getProductForEdit(params.id);
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const { product, error } = await getProductForEdit(resolvedParams.id);
 
   if (error || !product) {
     notFound();
@@ -24,6 +25,7 @@ export default async function EditProductPage({ params }: { params: { id: string
     compressiveStrength: product.compressiveStrength,
     isPublished: product.isPublished,
     priceTiers: product.priceTiers,
+    images: product.images,
   };
 
   return <ProductForm mode="edit" productId={product.id} initialData={initialData} />;

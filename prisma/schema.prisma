@@ -79,6 +79,8 @@ model Product {
   weight             Float?      // kg/viên
   compressiveStrength Float?     // Mác gạch (Mpa)
   images             String?     // Stored as JSON string (path array)
+  application        String?     // Stored as JSON string (array of applications e.g. ["Xây tường", "Ốp tường"])
+  stock              Int         @default(0)
   isPublished        Boolean     @default(true)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt

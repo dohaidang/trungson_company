@@ -31,12 +31,23 @@ function parseImages(images: string | null): string[] {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; search?: string }>;
+  searchParams: Promise<{ 
+    type?: string; 
+    search?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    applications?: string;
+    inStock?: string;
+  }>;
 }) {
   const params = await searchParams;
   const { products } = await getProducts({
-    type: params.type as ProductType | undefined,
+    types: params.type ? params.type.split(',') : undefined,
     search: params.search,
+    minPrice: params.minPrice ? parseInt(params.minPrice) : undefined,
+    maxPrice: params.maxPrice ? parseInt(params.maxPrice) : undefined,
+    applications: params.applications ? params.applications.split(',') : undefined,
+    inStock: params.inStock === 'true' ? true : undefined,
   });
 
   return (

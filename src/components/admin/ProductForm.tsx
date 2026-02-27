@@ -32,6 +32,8 @@ interface ProductFormData {
   isPublished: boolean;
   priceTiers: PriceTierInput[];
   images: string[];
+  application: string[];
+  stock: number;
 }
 
 interface ProductFormProps {
@@ -58,6 +60,8 @@ const DEFAULT_FORM: ProductFormData = {
   isPublished: true,
   priceTiers: [{ minQuantity: 0, maxQuantity: 999, unitPrice: 0 }],
   images: [],
+  application: [],
+  stock: 0,
 };
 
 export function ProductForm({ mode, productId, initialData }: ProductFormProps) {
@@ -180,6 +184,8 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
         isPublished: form.isPublished,
         priceTiers: form.priceTiers,
         images: form.images.filter((img) => img.trim() !== ""),
+        application: form.application,
+        stock: form.stock,
       };
 
       let result;
@@ -288,8 +294,39 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
                   className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none" />
               </div>
 
+              {/* Application Filter Tags */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-500 mb-1.5">Ứng dụng (để làm bộ lọc)</label>
+                <div className="flex flex-wrap gap-2">
+                  {["Xây tường", "Ốp tường", "Lát nền", "Trang trí", "Hạ tầng (vỉa hè)", "Đổ móng"].map((app) => (
+                    <label key={app} className="flex items-center gap-2 cursor-pointer bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={form.application.includes(app)}
+                        onChange={(e) => {
+                          const newApp = e.target.checked 
+                            ? [...form.application, app] 
+                            : form.application.filter(a => a !== app);
+                          updateField("application", newApp);
+                        }}
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm font-medium text-gray-700">{app}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stock */}
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5">Số lượng Tồn kho</label>
+                <input type="number" step="1" min="0" value={form.stock} onChange={(e) => updateField("stock", parseInt(e.target.value) || 0)}
+                  placeholder="VD: 1000"
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+              </div>
+
               {/* Published toggle */}
-              <div className="md:col-span-2 flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <button type="button" onClick={() => updateField("isPublished", !form.isPublished)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isPublished ? "bg-primary" : "bg-gray-300"}`}>
                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${form.isPublished ? "translate-x-6" : "translate-x-1"}`} />
