@@ -43,7 +43,7 @@ export default function Home() {
                 </h1>
                 <p className="mx-auto max-w-[600px] text-lg font-light leading-relaxed text-gray-200">
                   Cung cấp vật liệu xây dựng cao cấp cho ngôi nhà mơ ước của bạn. 
-                  <br className="hidden sm:block"/> Đ trusted by over 5000+ nhà thầu trên khắp Việt Nam.
+                  <br className="hidden sm:block"/> Được tin tưởng bởi 5000+ nhà thầu trên khắp Việt Nam.
                 </p>
               </div>
               <div className="mt-4 flex flex-col gap-4 sm:flex-row">

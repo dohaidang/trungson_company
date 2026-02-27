@@ -1,12 +1,7 @@
-import { AdminDashboardClient } from '@/components/admin/AdminDashboardClient';
-import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Admin Preview | Trung Sơn Company',
-};
-
-// Temporary preview route - no auth required
-// Delete this file when database is configured
+// Preview route no longer needed — database is configured
+// Redirect to the real admin page
 export default function AdminPreviewPage() {
-  return <AdminDashboardClient />;
+  redirect('/admin');
 }

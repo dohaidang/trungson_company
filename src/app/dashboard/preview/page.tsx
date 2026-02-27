@@ -1,17 +1,7 @@
-import { DashboardClient } from '@/components/dashboard/DashboardClient';
-import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Dashboard Preview | Trung Sơn Company',
-};
-
-// Temporary preview route - no auth required
-// Delete this file when database is configured
+// Preview route no longer needed — database is configured
+// Redirect to the real dashboard page
 export default function DashboardPreviewPage() {
-  return (
-    <DashboardClient
-      userName="Nguyễn Văn A"
-      userEmail="nguyenvana@example.com"
-    />
-  );
+  redirect('/dashboard');
 }
