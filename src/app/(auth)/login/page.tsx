@@ -45,8 +45,9 @@ function LoginContent() {
         return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      // Force full-page reload to trigger server-side role check
+      // Server component in /dashboard will redirect admin to /admin
+      window.location.href = "/dashboard";
     } catch {
       setError("Không thể kết nối server. Vui lòng thử lại.");
       setLoading(false);

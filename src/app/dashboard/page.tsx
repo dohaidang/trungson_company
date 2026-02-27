@@ -17,6 +17,12 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
+  // Admin should use /admin dashboard
+  const userRole = (session.user as { role?: string }).role;
+  if (userRole === 'ADMIN') {
+    redirect('/admin');
+  }
+
   // Fetch real data from DB
   const [ordersResult, profileResult] = await Promise.all([
     getUserOrders(),

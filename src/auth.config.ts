@@ -9,20 +9,12 @@ export const authConfig = {
             const isLoggedIn = !!auth?.user;
             const pathname = nextUrl.pathname;
 
-            // Protect /admin routes — require ADMIN role
-            if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/preview')) {
-                if (!isLoggedIn) return false;
-                const role = (auth?.user as { role?: string })?.role;
-                if (role !== 'ADMIN') {
-                    return Response.redirect(new URL('/dashboard', nextUrl));
-                }
-                return true;
-            }
-
-            // Protect /dashboard routes — require login
-            if (pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/preview')) {
+            // Protect /admin and /dashboard routes — require login only
+            // Role-based access is handled at the page level (server components)
+            // because middleware doesn't have access to custom session fields (role)
+            if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard')) {
                 if (isLoggedIn) return true;
-                return false;
+                return false; // Redirect to login
             }
 
             // Redirect logged-in users away from auth pages

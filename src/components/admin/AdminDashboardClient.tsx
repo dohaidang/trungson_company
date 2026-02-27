@@ -10,7 +10,6 @@ import {
   LogOut,
   DollarSign,
   Eye,
-  MoreHorizontal,
   Search,
   Clock,
   CheckCircle2,
@@ -192,7 +191,7 @@ export function AdminDashboardClient({ stats, orders, products, users }: AdminDa
         </div>
 
         <div className="p-4 sm:p-6 lg:p-8">
-          {activeTab === "overview" && <OverviewTab stats={stats} orders={orders} />}
+          {activeTab === "overview" && <OverviewTab stats={stats} orders={orders} users={users} />}
           {activeTab === "orders" && <OrdersTab orders={orders} />}
           {activeTab === "products" && <ProductsTab products={products} />}
           {activeTab === "users" && <UsersTab users={users} />}
@@ -205,7 +204,7 @@ export function AdminDashboardClient({ stats, orders, products, users }: AdminDa
 /* ============================= */
 /* ========= OVERVIEW ========= */
 /* ============================= */
-function OverviewTab({ stats, orders }: { stats: StatsData | null; orders: OrderData[] }) {
+function OverviewTab({ stats, orders, users }: { stats: StatsData | null; orders: OrderData[]; users: UserData[] }) {
   if (!stats) {
     return <div className="text-center py-12 text-gray-400">Không thể tải dữ liệu thống kê.</div>;
   }
@@ -216,6 +215,12 @@ function OverviewTab({ stats, orders }: { stats: StatsData | null; orders: Order
     { label: "Người Dùng", value: stats.totalUsers.toLocaleString(), icon: Users, color: "bg-purple-500" },
     { label: "Sản Phẩm", value: stats.totalProducts.toString(), icon: Package, color: "bg-amber-500" },
   ];
+
+  // Calculate role counts for user summary
+  const roleCounts = users.reduce((acc, u) => {
+    acc[u.role] = (acc[u.role] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="flex flex-col gap-6">
@@ -236,7 +241,7 @@ function OverviewTab({ stats, orders }: { stats: StatsData | null; orders: Order
         ))}
       </div>
 
-      {/* Order Status breakdown + Unread contacts */}
+      {/* Order Status breakdown + Notifications */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         <div className="xl:col-span-3 bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-6">
@@ -326,6 +331,107 @@ function OverviewTab({ stats, orders }: { stats: StatsData | null; orders: Order
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Top Customers + User Role Summary */}
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        {/* Top Customers */}
+        <div className="xl:col-span-3 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h2 className="font-bold text-gray-900">Top Khách Hàng</h2>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Theo chi tiêu</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50/80">
+                  <th className="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400">#</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400">Khách Hàng</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 hidden md:table-cell">SĐT</th>
+                  <th className="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-gray-400">Đơn Hàng</th>
+                  <th className="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-gray-400">Chi Tiêu</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {[...users]
+                  .sort((a, b) => b.spent - a.spent)
+                  .slice(0, 5)
+                  .map((user, i) => (
+                    <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-3">
+                        <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-black ${
+                          i === 0 ? "bg-amber-100 text-amber-700" : i === 1 ? "bg-gray-200 text-gray-600" : i === 2 ? "bg-orange-100 text-orange-600" : "bg-gray-100 text-gray-400"
+                        }`}>{i + 1}</span>
+                      </td>
+                      <td className="px-6 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">
+                            {user.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                            <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-500 hidden md:table-cell">{user.phone || "—"}</td>
+                      <td className="px-6 py-3 text-sm font-bold text-gray-900 text-right">{user.orders}</td>
+                      <td className="px-6 py-3 text-sm font-bold text-primary text-right">
+                        {user.spent > 0 ? `${(user.spent / 1000000).toFixed(1)}M` : "0đ"}
+                      </td>
+                    </tr>
+                  ))}
+                {users.length === 0 && (
+                  <tr><td colSpan={5} className="py-8 text-center text-sm text-gray-400">Chưa có dữ liệu khách hàng</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* User Role Summary */}
+        <div className="xl:col-span-2 bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-bold text-gray-900">Phân Loại Users</h2>
+            <Users className="size-4 text-gray-300" />
+          </div>
+          <div className="flex flex-col gap-3">
+            {Object.entries(roleCounts).length > 0 ? Object.entries(roleCounts).map(([role, count]) => {
+              const roleInfo = ROLE_MAP[role] || { label: role, color: "bg-gray-100 text-gray-600 border-gray-200" };
+              const pct = users.length > 0 ? Math.round((count / users.length) * 100) : 0;
+              return (
+                <div key={role} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                  <div className="flex items-center gap-3">
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${roleInfo.color}`}>
+                      {roleInfo.label}
+                    </span>
+                    <span className="text-sm font-medium text-gray-600">{count} người</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-xs font-bold text-gray-500">{pct}%</span>
+                  </div>
+                </div>
+              );
+            }) : (
+              <p className="text-sm text-gray-400 text-center py-4">Chưa có dữ liệu</p>
+            )}
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400">Tổng người dùng</span>
+              <span className="text-lg font-black text-gray-900">{users.length}</span>
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <span className="text-xs text-gray-400">Tổng chi tiêu</span>
+              <span className="text-sm font-bold text-primary">
+                {(users.reduce((sum, u) => sum + u.spent, 0) / 1000000).toFixed(1)}M
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -482,7 +588,6 @@ function ProductsTab({ products }: { products: ProductData[] }) {
     });
   };
 
-  // Product type labels
   const typeLabels: Record<string, string> = {
     SOLID: "Gạch đặc",
     FOUR_HOLE: "Gạch 4 lỗ",
