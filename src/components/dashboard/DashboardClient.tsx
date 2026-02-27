@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import {
   LayoutDashboard,
@@ -66,9 +67,9 @@ export function DashboardClient({ userName, userEmail, userPhone, joinedDate, or
     <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] bg-background">
       {/* Sidebar */}
       <aside className="w-full lg:w-64 bg-card border-b lg:border-b-0 lg:border-r border-border shrink-0">
-        <div className="p-6 border-b border-border hidden lg:block">
+        <Link href="/" className="p-6 border-b border-border hidden lg:block hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm shadow-sm">
               {userName?.charAt(0)?.toUpperCase() || "U"}
             </div>
             <div className="min-w-0">
@@ -76,7 +77,7 @@ export function DashboardClient({ userName, userEmail, userPhone, joinedDate, or
               <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Tab buttons */}
         <nav className="flex lg:flex-col p-2 lg:p-3 gap-1 overflow-x-auto lg:overflow-visible">

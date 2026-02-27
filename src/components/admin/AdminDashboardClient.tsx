@@ -125,13 +125,13 @@ export function AdminDashboardClient({ stats, orders, products, users }: AdminDa
       {/* Dark Sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-[#1e1e2d] text-gray-300 shrink-0">
         <div className="px-5 py-5 border-b border-white/5">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-black">TS</div>
             <div>
               <p className="text-sm font-bold text-white">Admin Panel</p>
               <p className="text-[10px] text-gray-500">Trung Sơn Company</p>
             </div>
-          </div>
+          </Link>
         </div>
         <nav className="flex-1 flex flex-col p-3 gap-0.5">
           <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Quản lý</p>
