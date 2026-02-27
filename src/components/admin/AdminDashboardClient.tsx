@@ -112,6 +112,10 @@ const SIDEBAR_ITEMS = [
 
 export function AdminDashboardClient({ stats, orders, products, users }: AdminDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const pendingOrdersCount = stats?.ordersByStatus.find(s => s.status === 'PENDING')?.count || 0;
+  const totalNotifications = (stats?.unreadContacts || 0) + pendingOrdersCount;
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] bg-[#f4f6f9]">
@@ -182,12 +186,63 @@ export function AdminDashboardClient({ stats, orders, products, users }: AdminDa
               {new Date().toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {stats && stats.unreadContacts > 0 && (
-              <button className="relative p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
-                <Bell className="size-5" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
-              </button>
+          <div className="flex items-center gap-3 relative">
+            {stats && totalNotifications > 0 && (
+              <>
+                {showNotifications && (
+                  <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                )}
+                <div className="relative z-50">
+                  <button 
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className={`relative p-2 rounded-lg transition-colors ${showNotifications ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100 text-gray-500'}`}
+                    title="Thông báo"
+                  >
+                    <Bell className="size-5" />
+                    <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {showNotifications && (
+                    <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden origin-top-right">
+                      <div className="p-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Thông báo mới</span>
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{totalNotifications}</span>
+                      </div>
+                      <div className="max-h-80 overflow-y-auto p-2 flex flex-col gap-1">
+                        {stats.unreadContacts > 0 && (
+                          <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 cursor-pointer transition-colors group">
+                            <div className="mt-0.5 bg-amber-100 p-1.5 rounded-lg text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                              <Bell className="size-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-gray-900 group-hover:text-amber-700">{stats.unreadContacts} liên hệ chưa đọc</p>
+                              <p className="text-xs text-gray-500 mt-0.5">Khách hàng gửi qua form website</p>
+                            </div>
+                          </div>
+                        )}
+                        {pendingOrdersCount > 0 && (
+                          <div 
+                            onClick={() => { setActiveTab("orders"); setShowNotifications(false); }}
+                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group"
+                          >
+                            <div className="mt-0.5 bg-blue-100 p-1.5 rounded-lg text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                              <Clock className="size-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-gray-900 group-hover:text-blue-700">{pendingOrdersCount} đơn hàng chờ xử lý</p>
+                              <p className="text-xs text-gray-500 mt-0.5">Cần được phê duyệt giao hàng</p>
+                            </div>
+                          </div>
+                        )}
+                        {totalNotifications === 0 && (
+                          <p className="text-sm text-gray-500 text-center py-4">Không có thông báo mới.</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
             <div className="hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">A</div>
           </div>
@@ -270,9 +325,9 @@ function OverviewTab({ stats, orders, users }: { stats: StatsData | null; orders
           </div>
         </div>
 
-        <div className="xl:col-span-2 bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+        <div className="xl:col-span-2 bg-white rounded-xl p-6 border border-gray-100 shadow-sm scroll-mt-24">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-bold text-gray-900">Thông Báo</h2>
+            <h2 className="font-bold text-gray-900">Chi Tiết Cần Xử Lý</h2>
             <ArrowUpRight className="size-4 text-gray-300" />
           </div>
           <div className="flex flex-col gap-4">
