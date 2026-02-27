@@ -729,3 +729,72 @@ export async function deleteProduct(productId: string) {
         return { success: false, error: 'Không thể xóa sản phẩm' };
     }
 }
+
+// ==========================================
+// Contact Inquiries (Website Forms)
+// ==========================================
+
+// Lấy danh sách liên hệ từ khách hàng (Sắp xếp mới nhất lên đầu)
+export async function getAdminContacts() {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { contacts: [], error };
+
+        const contacts = await prisma.contactInquiry.findMany({
+            orderBy: { createdAt: 'desc' },
+        });
+
+        const serialized = contacts.map(c => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone || '',
+            subject: c.subject || '',
+            message: c.message,
+            isRead: c.isRead,
+            createdAt: c.createdAt.toISOString(),
+        }));
+
+        return { contacts: serialized, error: null };
+    } catch (error) {
+        console.error('getAdminContacts error:', error);
+        return { contacts: [], error: 'Lỗi server khi fetch liên hệ' };
+    }
+}
+
+// Đánh dấu thư là đã đọc / chưa đọc
+export async function toggleContactReadStatus(contactId: string, isRead: boolean) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        await prisma.contactInquiry.update({
+            where: { id: contactId },
+            data: { isRead },
+        });
+
+        revalidatePath('/admin');
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('toggleContactReadStatus error:', error);
+        return { success: false, error: 'Không thể cập nhật trạng thái liên hệ' };
+    }
+}
+
+// Xóa thư liên hệ
+export async function deleteContact(contactId: string) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        await prisma.contactInquiry.delete({
+            where: { id: contactId },
+        });
+
+        revalidatePath('/admin');
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('deleteContact error:', error);
+        return { success: false, error: 'Không thể xóa liên hệ' };
+    }
+}

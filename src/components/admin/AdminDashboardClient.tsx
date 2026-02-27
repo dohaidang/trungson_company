@@ -27,8 +27,9 @@ import {
   Plus,
   Trash2,
   Edit2,
+  Mail,
 } from "lucide-react";
-import { updateOrderStatus, toggleProductPublish, deleteProduct, deleteUser } from "@/app/actions/admin";
+import { updateOrderStatus, toggleProductPublish, deleteProduct, deleteUser, toggleContactReadStatus, deleteContact } from "@/app/actions/admin";
 
 // ===== TYPES =====
 interface StatsData {
@@ -83,11 +84,23 @@ interface UserData {
   spent: number;
 }
 
+export interface ContactData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 interface AdminDashboardClientProps {
   stats: StatsData | null;
   orders: OrderData[];
   products: ProductData[];
   users: UserData[];
+  contacts: ContactData[];
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -104,16 +117,17 @@ const ROLE_MAP: Record<string, { label: string; color: string }> = {
   customer: { label: "Khách hàng", color: "bg-slate-500/10 text-slate-600 border-slate-500/20" },
 };
 
-type TabKey = "overview" | "orders" | "products" | "users";
+type TabKey = "overview" | "orders" | "products" | "users" | "contacts";
 
 const SIDEBAR_ITEMS = [
   { key: "overview" as TabKey, label: "Tổng Quan", icon: LayoutDashboard },
   { key: "orders" as TabKey, label: "Đơn Hàng", icon: ShoppingCart },
   { key: "products" as TabKey, label: "Sản Phẩm", icon: Package },
   { key: "users" as TabKey, label: "Người Dùng", icon: Users },
+  { key: "contacts" as TabKey, label: "Liên Hệ", icon: Mail },
 ];
 
-export function AdminDashboardClient({ stats, orders, products, users }: AdminDashboardClientProps) {
+export function AdminDashboardClient({ stats, orders, products, users, contacts }: AdminDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -214,7 +228,10 @@ export function AdminDashboardClient({ stats, orders, products, users }: AdminDa
                       </div>
                       <div className="max-h-80 overflow-y-auto p-2 flex flex-col gap-1">
                         {stats.unreadContacts > 0 && (
-                          <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 cursor-pointer transition-colors group">
+                          <div 
+                            onClick={() => { setActiveTab("contacts"); setShowNotifications(false); }}
+                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 cursor-pointer transition-colors group"
+                          >
                             <div className="mt-0.5 bg-amber-100 p-1.5 rounded-lg text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors">
                               <Bell className="size-4" />
                             </div>
@@ -256,6 +273,7 @@ export function AdminDashboardClient({ stats, orders, products, users }: AdminDa
           {activeTab === "orders" && <OrdersTab orders={orders} />}
           {activeTab === "products" && <ProductsTab products={products} />}
           {activeTab === "users" && <UsersTab users={users} />}
+          {activeTab === "contacts" && <ContactsTab contacts={contacts} />}
         </div>
       </main>
     </div>
@@ -943,6 +961,108 @@ function UsersTab({ users }: { users: UserData[] }) {
         <div className="px-5 py-3 border-t border-gray-100">
           <p className="text-xs text-gray-400">Tổng {filtered.length} người dùng</p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ========================== */
+/* ======== CONTACTS ======== */
+/* ========================== */
+function ContactsTab({ contacts }: { contacts: ContactData[] }) {
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const filteredContacts = contacts.filter((c) => filter === "unread" ? !c.isRead : true);
+
+  const handleToggleRead = (id: string, currentStatus: boolean) => {
+    startTransition(async () => {
+      await toggleContactReadStatus(id, !currentStatus);
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Chắc chắn muốn xóa thư liên hệ này?")) {
+      startTransition(async () => {
+        await deleteContact(id);
+      });
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex justify-between items-center">
+        <div className="flex bg-gray-100 p-1 rounded-lg w-max">
+          <button onClick={() => setFilter("all")}
+            className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${filter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}>
+            Tất Cả
+          </button>
+          <button onClick={() => setFilter("unread")}
+            className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${filter === "unread" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-900"}`}>
+            Chưa Đọc
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col gap-0 divide-y divide-gray-50">
+        {filteredContacts.length === 0 ? (
+          <div className="p-8 text-center text-gray-400 text-sm">Không có thư liên hệ nào.</div>
+        ) : (
+          filteredContacts.map(contact => (
+            <div key={contact.id} className={`flex flex-col transition-colors ${!contact.isRead ? "bg-blue-50/30" : "hover:bg-gray-50/50"}`}>
+              <div 
+                onClick={() => setExpandedId(expandedId === contact.id ? null : contact.id)}
+                className="flex items-center gap-4 p-4 cursor-pointer"
+              >
+                <div onClick={(e) => { e.stopPropagation(); handleToggleRead(contact.id, contact.isRead); }}
+                  className={`flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors ${!contact.isRead ? "bg-primary text-primary-foreground" : "bg-gray-100 text-gray-400 hover:bg-gray-200"}`} title={contact.isRead ? "Đánh dấu Chưa đọc" : "Đánh dấu Đã đọc"}>
+                  {contact.isRead ? <Mail className="size-4" /> : <Bell className="size-4" />}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center mb-0.5">
+                    <p className={`text-sm truncate pr-4 ${!contact.isRead ? "font-black text-gray-900" : "font-bold text-gray-700"}`}>
+                      {contact.name} {contact.subject && <span className="opacity-60 text-xs font-medium ml-2">- {contact.subject}</span>}
+                    </p>
+                    <span className="text-[10px] text-gray-400 shrink-0">{new Date(contact.createdAt).toLocaleString("vi-VN")}</span>
+                  </div>
+                  <p className={`text-xs truncate ${!contact.isRead ? "text-primary font-bold" : "text-gray-500"}`}>
+                    {contact.message.split('\n')[0]}...
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex items-center gap-2">
+                  <button onClick={(e) => { e.stopPropagation(); handleDelete(contact.id); }}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Xóa thư">
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Expanded Detail */}
+              {expandedId === contact.id && (
+                <div className="p-4 pt-1 ml-14 mr-4 mb-4 bg-gray-50 rounded-xl border border-gray-100 text-sm">
+                  <div className="grid grid-cols-2 gap-4 mb-4 text-xs">
+                    <div><span className="text-gray-400 font-bold block mb-1">Email</span> <a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email}</a></div>
+                    <div><span className="text-gray-400 font-bold block mb-1">Điện Thoại</span> {contact.phone || "—"}</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm whitespace-pre-wrap text-gray-700 leading-relaxed font-medium">
+                    {contact.message}
+                  </div>
+                  {!contact.isRead && (
+                    <div className="mt-4 flex justify-end">
+                      <button onClick={() => handleToggleRead(contact.id, contact.isRead)} disabled={isPending}
+                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                        <CheckCircle2 className="size-3" /> Đánh dấu đã đọc
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

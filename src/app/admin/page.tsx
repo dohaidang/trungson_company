@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { AdminDashboardClient } from '@/components/admin/AdminDashboardClient';
-import { getAdminStats, getAdminOrders, getAdminProducts, getAdminUsers } from '@/app/actions/admin';
+import { getAdminStats, getAdminOrders, getAdminProducts, getAdminUsers, getAdminContacts } from '@/app/actions/admin';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -22,11 +22,12 @@ export default async function AdminPage() {
   }
 
   // Fetch all admin data in parallel
-  const [statsResult, ordersResult, productsResult, usersResult] = await Promise.all([
+  const [statsResult, ordersResult, productsResult, usersResult, contactsResult] = await Promise.all([
     getAdminStats(),
     getAdminOrders(),
     getAdminProducts(),
     getAdminUsers(),
+    getAdminContacts(),
   ]);
 
   return (
@@ -35,6 +36,7 @@ export default async function AdminPage() {
       orders={ordersResult.orders}
       products={productsResult.products}
       users={usersResult.users}
+      contacts={contactsResult.contacts}
     />
   );
 }

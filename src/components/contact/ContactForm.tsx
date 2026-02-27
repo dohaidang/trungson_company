@@ -15,12 +15,21 @@ export function ContactForm() {
     setStatus("idle");
 
     const formData = new FormData(e.currentTarget);
+    const projectType = formData.get("projectType") as string;
+    const estimatedVolume = formData.get("estimatedVolume") as string;
+    const rawMessage = formData.get("message") as string;
+
+    const formattedMessage = `[Loại Dự Án]: ${projectType}
+[Khối lượng ước tính]: ${estimatedVolume || 'Không cung cấp'}
+[Yêu cầu chi tiết]:
+${rawMessage}`;
+
     const data = {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       phone: (formData.get("phone") as string) || undefined,
       subject: (formData.get("subject") as string) || undefined,
-      message: formData.get("message") as string,
+      message: formattedMessage,
     };
 
     const result = await submitContact(data);
@@ -134,6 +143,7 @@ export function ContactForm() {
             Khối Lượng Ước Tính (m² hoặc số lượng)
           </label>
           <input
+            name="estimatedVolume"
             className="w-full bg-muted/50 px-4 py-3 text-sm border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
             placeholder="Ví dụ: 5,000 m²"
             type="text"

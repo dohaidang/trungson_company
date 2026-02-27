@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/db';
 import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 
 // Contact form validation schema
 const contactSchema = z.object({
@@ -31,6 +32,8 @@ export async function submitContact(data: {
         await prisma.contactInquiry.create({
             data: result.data,
         });
+
+        revalidatePath('/admin');
 
         return {
             success: true,
