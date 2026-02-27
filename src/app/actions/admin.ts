@@ -292,6 +292,7 @@ const productSchema = z.object({
     compressiveStrength: z.number().positive().nullable().optional(),
     isPublished: z.boolean().default(true),
     priceTiers: z.array(priceTierSchema).min(1, 'Cần ít nhất 1 mức giá'),
+    images: z.array(z.string()).optional().default([]),
 });
 
 // Helper: generate slug from name
@@ -334,6 +335,7 @@ export async function getProductForEdit(productId: string) {
                 weight: product.weight,
                 compressiveStrength: product.compressiveStrength,
                 isPublished: product.isPublished,
+                images: product.images ? JSON.parse(product.images) : [],
                 priceTiers: product.priceTiers.map(t => ({
                     id: t.id,
                     minQuantity: t.minQuantity,

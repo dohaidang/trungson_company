@@ -11,6 +11,7 @@ import {
   Trash2,
   CheckCircle2,
   AlertCircle,
+  UploadCloud,
 } from "lucide-react";
 import { createProduct, updateProduct } from "@/app/actions/admin";
 
@@ -30,6 +31,7 @@ interface ProductFormData {
   compressiveStrength: number | null;
   isPublished: boolean;
   priceTiers: PriceTierInput[];
+  images: string[];
 }
 
 interface ProductFormProps {
@@ -55,6 +57,7 @@ const DEFAULT_FORM: ProductFormData = {
   compressiveStrength: null,
   isPublished: true,
   priceTiers: [{ minQuantity: 0, maxQuantity: 999, unitPrice: 0 }],
+  images: [],
 };
 
 export function ProductForm({ mode, productId, initialData }: ProductFormProps) {
@@ -62,6 +65,7 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
   const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState<ProductFormData>(initialData || DEFAULT_FORM);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const updateField = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -92,6 +96,65 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
     }));
   };
 
+  // Image management
+  const addImage = () => {
+    setForm((prev) => ({ ...prev, images: [...prev.images, ""] }));
+  };
+
+  const removeImage = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateImage = (index: number, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.map((img, i) => (i === index ? value : img)),
+    }));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    setMsg(null);
+
+    try {
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Lỗi tải ảnh lên. Vui lòng thử lại.");
+      }
+
+      const data = await res.json();
+      if (data.urls && Array.isArray(data.urls)) {
+        setForm((prev) => ({
+          ...prev,
+          images: [...prev.images, ...data.urls],
+        }));
+        setMsg({ type: "success", text: `Đã phản hồi ảnh thành công (${data.urls.length} files)` });
+        setTimeout(() => setMsg(null), 3000);
+      }
+    } catch (error: any) {
+      setMsg({ type: "error", text: error.message || "Không thể tải ảnh" });
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      e.target.value = "";
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
@@ -116,6 +179,7 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
         compressiveStrength: form.compressiveStrength,
         isPublished: form.isPublished,
         priceTiers: form.priceTiers,
+        images: form.images.filter((img) => img.trim() !== ""),
       };
 
       let result;
@@ -272,6 +336,49 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
               ))}
             </div>
             <p className="text-[10px] text-gray-400 mt-3">* Để trống "SL Tối Đa" cho mức giá không giới hạn số lượng</p>
+          </div>
+
+          {/* Images */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-3">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">Hình Ảnh Phụ</h2>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isUploading ? <Loader2 className="size-3 animate-spin" /> : <UploadCloud className="size-3" />}
+                  {isUploading ? "Đang tải lên..." : "Tải ảnh lên"}
+                  <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
+                </label>
+                <div className="w-px h-4 bg-gray-200" />
+                <button type="button" onClick={addImage}
+                  className="flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-200 transition-colors">
+                  <Plus className="size-3" /> Thêm theo Link
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              {form.images.map((img, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <input type="url" value={img} onChange={(e) => updateImage(i, e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                  </div>
+                  {img && (
+                    <div className="h-9 w-9 relative rounded border border-gray-200 overflow-hidden shrink-0 bg-gray-50 flex items-center justify-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img} alt={`Preview ${i}`} className="object-cover w-full h-full" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                    </div>
+                  )}
+                  <button type="button" onClick={() => removeImage(i)}
+                    className="flex items-center justify-center h-9 w-9 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0">
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              ))}
+              {form.images.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">Chưa có hình ảnh nào. Nhấn "Thêm ảnh" để gắn link ảnh.</p>
+              )}
+            </div>
           </div>
         </form>
       </div>
