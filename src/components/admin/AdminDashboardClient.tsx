@@ -971,10 +971,19 @@ function UsersTab({ users }: { users: UserData[] }) {
 /* ========================== */
 function ContactsTab({ contacts }: { contacts: ContactData[] }) {
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [filterDate, setFilterDate] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const filteredContacts = contacts.filter((c) => filter === "unread" ? !c.isRead : true);
+  const filteredContacts = contacts.filter((c) => {
+    if (filter === "unread" && c.isRead) return false;
+    if (filterDate) {
+      // Compare YYYY-MM-DD
+      const contactDate = new Date(c.createdAt).toISOString().split('T')[0];
+      if (contactDate !== filterDate) return false;
+    }
+    return true;
+  });
 
   const handleToggleRead = (id: string, currentStatus: boolean) => {
     startTransition(async () => {
@@ -992,7 +1001,7 @@ function ContactsTab({ contacts }: { contacts: ContactData[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex bg-gray-100 p-1 rounded-lg w-max">
           <button onClick={() => setFilter("all")}
             className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${filter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}>
@@ -1002,6 +1011,21 @@ function ContactsTab({ contacts }: { contacts: ContactData[] }) {
             className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${filter === "unread" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-900"}`}>
             Chưa Đọc
           </button>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Ngày gửi:</label>
+          <input 
+            type="date" 
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+          />
+          {filterDate && (
+            <button onClick={() => setFilterDate("")} className="text-xs text-gray-500 hover:text-red-500 hover:underline">
+              Bỏ lọc
+            </button>
+          )}
         </div>
       </div>
 
