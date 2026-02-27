@@ -7,8 +7,9 @@ export const metadata: Metadata = {
   title: "Chỉnh Sửa Người Dùng | Admin",
 };
 
-export default async function EditUserPage({ params }: { params: { id: string } }) {
-  const { user, error } = await getUserForEdit(params.id);
+export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const { user, error } = await getUserForEdit(id);
 
   if (error || !user) {
     notFound();
