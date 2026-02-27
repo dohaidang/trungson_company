@@ -4,6 +4,7 @@ import prisma from '@/lib/db';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 
 // Helper to verify admin role
 async function verifyAdmin() {
@@ -269,6 +270,185 @@ export async function getAdminUsers() {
     } catch (error) {
         console.error('getAdminUsers error:', error);
         return { users: [], error: 'Lỗi server' };
+    }
+}
+
+// ============================================
+// USER CRUD
+// ============================================
+
+const userSchema = z.object({
+    name: z.string().min(2, 'Tên người dùng tối thiểu 2 ký tự').optional().or(z.literal('')),
+    email: z.string().email('Email không hợp lệ'),
+    phone: z.string().optional().or(z.literal('')),
+    role: z.enum(['ADMIN', 'CUSTOMER', 'CONTRACTOR']),
+    password: z.string().optional().or(z.literal('')),
+});
+
+export async function getUserForEdit(userId: string) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { user: null, error };
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+                // Do not return password hash
+            }
+        });
+
+        if (!user) return { user: null, error: 'Người dùng không tồn tại' };
+
+        return { user, error: null };
+    } catch (error) {
+        console.error('getUserForEdit error:', error);
+        return { user: null, error: 'Lỗi server' };
+    }
+}
+
+export async function createUser(data: {
+    name?: string;
+    email: string;
+    phone?: string;
+    password?: string;
+    role: string;
+}) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        const parsed = userSchema.safeParse(data);
+        if (!parsed.success) {
+            return { success: false, error: parsed.error.issues[0]?.message || 'Dữ liệu không hợp lệ' };
+        }
+
+        const validated = parsed.data;
+
+        if (!validated.password || validated.password.length < 6) {
+            return { success: false, error: 'Mật khẩu phải từ 6 ký tự trở lên' };
+        }
+
+        // Check if email exists
+        const emailExists = await prisma.user.findUnique({ where: { email: validated.email } });
+        if (emailExists) return { success: false, error: 'Email đã được đăng ký' };
+
+        // Check phone if provided
+        if (validated.phone) {
+            const phoneExists = await prisma.user.findUnique({ where: { phone: validated.phone } });
+            if (phoneExists) return { success: false, error: 'Số điện thoại đã được đăng ký' };
+        }
+
+        const hashedPassword = await bcrypt.hash(validated.password, 10);
+
+        await prisma.user.create({
+            data: {
+                email: validated.email,
+                name: validated.name || null,
+                phone: validated.phone || null,
+                role: validated.role as 'ADMIN' | 'CUSTOMER' | 'CONTRACTOR',
+                password: hashedPassword,
+            },
+        });
+
+        revalidatePath('/admin');
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('createUser error:', error);
+        return { success: false, error: 'Không thể tạo người dùng' };
+    }
+}
+
+export async function updateUser(userId: string, data: {
+    name?: string;
+    email: string;
+    phone?: string;
+    password?: string;
+    role: string;
+}) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        const parsed = userSchema.safeParse(data);
+        if (!parsed.success) {
+            return { success: false, error: parsed.error.issues[0]?.message || 'Dữ liệu không hợp lệ' };
+        }
+
+        const validated = parsed.data;
+
+        const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+        if (!targetUser) return { success: false, error: 'Người dùng không tồn tại' };
+
+        // Check email uniqueness if modified
+        if (validated.email !== targetUser.email) {
+            const emailExists = await prisma.user.findUnique({ where: { email: validated.email } });
+            if (emailExists) return { success: false, error: 'Email đã được sử dụng bởi tài khoản khác' };
+        }
+
+        // Check phone uniqueness if modified
+        if (validated.phone && validated.phone !== targetUser.phone) {
+            const phoneExists = await prisma.user.findUnique({ where: { phone: validated.phone } });
+            if (phoneExists) return { success: false, error: 'Số điện thoại đã được sử dụng' };
+        }
+
+        const updateData: any = {
+            email: validated.email,
+            name: validated.name || null,
+            phone: validated.phone || null,
+            role: validated.role as 'ADMIN' | 'CUSTOMER' | 'CONTRACTOR',
+        };
+
+        // Update password if a new one is provided
+        if (validated.password && validated.password.length > 0) {
+            if (validated.password.length < 6) return { success: false, error: 'Mật khẩu phải từ 6 ký tự trở lên' };
+            updateData.password = await bcrypt.hash(validated.password, 10);
+        }
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+        });
+
+        revalidatePath('/admin');
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('updateUser error:', error);
+        return { success: false, error: 'Không thể cập nhật người dùng' };
+    }
+}
+
+export async function deleteUser(userId: string) {
+    try {
+        const { userId: adminId, error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        if (adminId === userId) {
+            return { success: false, error: 'Không thể xóa chính bạn!' };
+        }
+
+        const targetUser = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { _count: { select: { orders: true } } }
+        });
+
+        if (!targetUser) return { success: false, error: 'Người dùng không tồn tại' };
+
+        if (targetUser._count.orders > 0) {
+            return { success: false, error: `Không thể xóa: Người dùng này đang có ${targetUser._count.orders} đơn hàng` };
+        }
+
+        await prisma.user.delete({ where: { id: userId } });
+
+        revalidatePath('/admin');
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('deleteUser error:', error);
+        return { success: false, error: 'Không thể xóa người dùng' };
     }
 }
 
