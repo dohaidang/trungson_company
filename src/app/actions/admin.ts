@@ -3,6 +3,7 @@
 import prisma from '@/lib/db';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 // Helper to verify admin role
 async function verifyAdmin() {
@@ -268,5 +269,260 @@ export async function getAdminUsers() {
     } catch (error) {
         console.error('getAdminUsers error:', error);
         return { users: [], error: 'Lỗi server' };
+    }
+}
+
+// ============================================
+// PRODUCT CRUD
+// ============================================
+
+// Validation schema
+const priceTierSchema = z.object({
+    minQuantity: z.number().int().min(0),
+    maxQuantity: z.number().int().positive().nullable(),
+    unitPrice: z.number().positive('Giá phải lớn hơn 0'),
+});
+
+const productSchema = z.object({
+    name: z.string().min(3, 'Tên sản phẩm tối thiểu 3 ký tự'),
+    type: z.enum(['SOLID', 'FOUR_HOLE', 'TWO_HOLE', 'BLOCK', 'DECORATIVE']),
+    description: z.string().optional(),
+    dimensions: z.string().optional(),
+    weight: z.number().positive().nullable().optional(),
+    compressiveStrength: z.number().positive().nullable().optional(),
+    isPublished: z.boolean().default(true),
+    priceTiers: z.array(priceTierSchema).min(1, 'Cần ít nhất 1 mức giá'),
+});
+
+// Helper: generate slug from name
+function generateSlug(name: string): string {
+    return name
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .replace(/đ/g, 'd').replace(/Đ/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+}
+
+// Get single product for editing (with full data + price tiers)
+export async function getProductForEdit(productId: string) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { product: null, error };
+
+        const product = await prisma.product.findUnique({
+            where: { id: productId },
+            include: {
+                priceTiers: { orderBy: { minQuantity: 'asc' } },
+            },
+        });
+
+        if (!product) {
+            return { product: null, error: 'Sản phẩm không tồn tại' };
+        }
+
+        return {
+            product: {
+                id: product.id,
+                name: product.name,
+                slug: product.slug,
+                description: product.description || '',
+                type: product.type,
+                dimensions: product.dimensions || '',
+                weight: product.weight,
+                compressiveStrength: product.compressiveStrength,
+                isPublished: product.isPublished,
+                priceTiers: product.priceTiers.map(t => ({
+                    id: t.id,
+                    minQuantity: t.minQuantity,
+                    maxQuantity: t.maxQuantity,
+                    unitPrice: t.unitPrice,
+                })),
+            },
+            error: null,
+        };
+    } catch (error) {
+        console.error('getProductForEdit error:', error);
+        return { product: null, error: 'Lỗi server' };
+    }
+}
+
+// Create a new product
+export async function createProduct(data: {
+    name: string;
+    type: string;
+    description?: string;
+    dimensions?: string;
+    weight?: number | null;
+    compressiveStrength?: number | null;
+    isPublished?: boolean;
+    priceTiers: { minQuantity: number; maxQuantity: number | null; unitPrice: number }[];
+}) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        // Validate
+        const parsed = productSchema.safeParse(data);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message || 'Dữ liệu không hợp lệ';
+            return { success: false, error: firstError };
+        }
+
+        const validated = parsed.data;
+
+        // Generate unique slug
+        let slug = generateSlug(validated.name);
+        const existing = await prisma.product.findUnique({ where: { slug } });
+        if (existing) {
+            slug = `${slug}-${Date.now().toString(36)}`;
+        }
+
+        // Create product with price tiers in a transaction
+        await prisma.$transaction(async (tx) => {
+            const product = await tx.product.create({
+                data: {
+                    name: validated.name,
+                    slug,
+                    description: validated.description || null,
+                    type: validated.type as 'SOLID' | 'FOUR_HOLE' | 'TWO_HOLE' | 'BLOCK' | 'DECORATIVE',
+                    dimensions: validated.dimensions || null,
+                    weight: validated.weight ?? null,
+                    compressiveStrength: validated.compressiveStrength ?? null,
+                    isPublished: validated.isPublished,
+                },
+            });
+
+            // Create price tiers
+            await tx.priceTier.createMany({
+                data: validated.priceTiers.map(t => ({
+                    productId: product.id,
+                    minQuantity: t.minQuantity,
+                    maxQuantity: t.maxQuantity,
+                    unitPrice: t.unitPrice,
+                })),
+            });
+        });
+
+        revalidatePath('/admin');
+        revalidatePath('/products');
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('createProduct error:', error);
+        return { success: false, error: 'Không thể tạo sản phẩm' };
+    }
+}
+
+// Update an existing product
+export async function updateProduct(productId: string, data: {
+    name: string;
+    type: string;
+    description?: string;
+    dimensions?: string;
+    weight?: number | null;
+    compressiveStrength?: number | null;
+    isPublished?: boolean;
+    priceTiers: { minQuantity: number; maxQuantity: number | null; unitPrice: number }[];
+}) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        const parsed = productSchema.safeParse(data);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message || 'Dữ liệu không hợp lệ';
+            return { success: false, error: firstError };
+        }
+
+        const validated = parsed.data;
+
+        const existing = await prisma.product.findUnique({ where: { id: productId } });
+        if (!existing) {
+            return { success: false, error: 'Sản phẩm không tồn tại' };
+        }
+
+        // Generate slug if name changed
+        let slug = existing.slug;
+        if (validated.name !== existing.name) {
+            slug = generateSlug(validated.name);
+            const slugExists = await prisma.product.findFirst({
+                where: { slug, id: { not: productId } },
+            });
+            if (slugExists) {
+                slug = `${slug}-${Date.now().toString(36)}`;
+            }
+        }
+
+        // Update in transaction: product + replace price tiers
+        await prisma.$transaction(async (tx) => {
+            await tx.product.update({
+                where: { id: productId },
+                data: {
+                    name: validated.name,
+                    slug,
+                    description: validated.description || null,
+                    type: validated.type as 'SOLID' | 'FOUR_HOLE' | 'TWO_HOLE' | 'BLOCK' | 'DECORATIVE',
+                    dimensions: validated.dimensions || null,
+                    weight: validated.weight ?? null,
+                    compressiveStrength: validated.compressiveStrength ?? null,
+                    isPublished: validated.isPublished,
+                },
+            });
+
+            // Delete old tiers and create new ones
+            await tx.priceTier.deleteMany({ where: { productId } });
+            await tx.priceTier.createMany({
+                data: validated.priceTiers.map(t => ({
+                    productId,
+                    minQuantity: t.minQuantity,
+                    maxQuantity: t.maxQuantity,
+                    unitPrice: t.unitPrice,
+                })),
+            });
+        });
+
+        revalidatePath('/admin');
+        revalidatePath('/products');
+        revalidatePath(`/products/${slug}`);
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('updateProduct error:', error);
+        return { success: false, error: 'Không thể cập nhật sản phẩm' };
+    }
+}
+
+// Delete a product (only if no orders reference it)
+export async function deleteProduct(productId: string) {
+    try {
+        const { error } = await verifyAdmin();
+        if (error) return { success: false, error };
+
+        const product = await prisma.product.findUnique({
+            where: { id: productId },
+            include: { _count: { select: { orderItems: true } } },
+        });
+
+        if (!product) {
+            return { success: false, error: 'Sản phẩm không tồn tại' };
+        }
+
+        if (product._count.orderItems > 0) {
+            return { success: false, error: `Không thể xóa: sản phẩm có ${product._count.orderItems} đơn hàng liên quan` };
+        }
+
+        // Delete price tiers first, then product
+        await prisma.$transaction(async (tx) => {
+            await tx.priceTier.deleteMany({ where: { productId } });
+            await tx.product.delete({ where: { id: productId } });
+        });
+
+        revalidatePath('/admin');
+        revalidatePath('/products');
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('deleteProduct error:', error);
+        return { success: false, error: 'Không thể xóa sản phẩm' };
     }
 }

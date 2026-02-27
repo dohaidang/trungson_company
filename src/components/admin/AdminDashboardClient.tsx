@@ -24,8 +24,11 @@ import {
   AlertCircle,
   PackageCheck,
   EyeOff,
+  Plus,
+  Trash2,
+  Edit2,
 } from "lucide-react";
-import { updateOrderStatus, toggleProductPublish } from "@/app/actions/admin";
+import { updateOrderStatus, toggleProductPublish, deleteProduct } from "@/app/actions/admin";
 
 // ===== TYPES =====
 interface StatsData {
@@ -613,6 +616,10 @@ function ProductsTab({ products }: { products: ProductData[] }) {
           <input type="text" placeholder="Tìm sản phẩm..." value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
         </div>
+        <Link href="/admin/products/new"
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm shrink-0 whitespace-nowrap">
+          <Plus className="size-4" /> Thêm Sản Phẩm
+        </Link>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -642,12 +649,36 @@ function ProductsTab({ products }: { products: ProductData[] }) {
                       <span className="inline-flex items-center rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-600">Ẩn</span>
                     )}
                   </td>
-                  <td className="px-5 py-3.5">
-                    <button onClick={() => handleTogglePublish(p.id)} disabled={isPending}
-                      className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-                      title={p.isPublished ? "Ẩn sản phẩm" : "Hiện sản phẩm"}>
-                      {p.isPublished ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-                    </button>
+                  <td className="px-5 py-3.5 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <button onClick={() => handleTogglePublish(p.id)} disabled={isPending}
+                        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                        title={p.isPublished ? "Ẩn sản phẩm" : "Hiện sản phẩm"}>
+                        {p.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                      <Link href={`/admin/products/${p.id}/edit`}
+                        className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"
+                        title="Chỉnh sửa sản phẩm">
+                        <Edit2 className="size-4" />
+                      </Link>
+                      <button onClick={() => {
+                        if (confirm(`Bạn có chắc muốn xóa sản phẩm "${p.name}"? Hành động này không thể hoàn tác.`)) {
+                          startTransition(async () => {
+                            const res = await deleteProduct(p.id);
+                            if (res.success) {
+                              setActionMsg({ type: "success", text: "Xóa sản phẩm thành công" });
+                            } else {
+                              setActionMsg({ type: "error", text: res.error || "Lỗi xóa sản phẩm" });
+                            }
+                            setTimeout(() => setActionMsg(null), 3500);
+                          });
+                        }
+                      }} disabled={isPending || p.totalSold > 0}
+                        className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Xóa sản phẩm">
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
