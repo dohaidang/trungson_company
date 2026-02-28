@@ -37,6 +37,20 @@ export function Footer() {
               <Link href="/returns" className="text-sm text-muted-foreground hover:text-primary transition-colors">Đổi Trả</Link>
               <Link href="/calculator" className="text-sm text-muted-foreground hover:text-primary transition-colors">Hướng Dẫn Tính Toán</Link>
             </div>
+            <div className="flex flex-col gap-3">
+              <h4 className="font-bold text-foreground">Vị Trí</h4>
+              <div className="w-full sm:w-[300px] lg:w-[350px] h-[200px] rounded-md overflow-hidden shadow-sm">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2450.6658440945885!2d105.82952298236648!3d19.996040028356024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31366086a8071455%3A0x31a81834eaeec103!2zTmjDoCBNw6F5IEfhuqFjaCBUdXluZWwgVHJ1bmcgU8ahbg!5e0!3m2!1svi!2s!4v1772295780661!5m2!1svi!2s" 
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            </div>
           </div>
         </div>
         
