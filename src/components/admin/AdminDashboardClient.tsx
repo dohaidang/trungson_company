@@ -166,10 +166,15 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts,
       <aside className="hidden lg:flex flex-col w-60 bg-[#1e1e2d] text-gray-300 shrink-0">
         <div className="px-5 py-5 border-b border-white/5">
           <Link href="/" prefetch={true} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-black">TS</div>
+            {settings?.SITE_LOGO_URL ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={settings.SITE_LOGO_URL} alt="Logo" className="flex h-9 w-9 object-contain rounded-lg bg-white/10" />
+            ) : (
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-black">TS</div>
+            )}
             <div>
               <p className="text-sm font-bold text-white">Admin Panel</p>
-              <p className="text-[10px] text-gray-500">CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN</p>
+              <p className="text-[10px] text-gray-500 line-clamp-2 leading-tight pr-2">{settings?.SITE_NAME || "CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN"}</p>
             </div>
           </Link>
         </div>
