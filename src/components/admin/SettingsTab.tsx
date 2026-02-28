@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2, AlertCircle, Loader2, Save, Globe, Phone, Share2, Search as SearchIcon, UploadCloud, X } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2, Save, Globe, Phone, Share2, Search as SearchIcon, UploadCloud, X, AlertTriangle } from "lucide-react";
 import { updateSettings } from "@/app/actions/setting";
 
 interface SettingsTabProps {
@@ -98,6 +98,17 @@ export function SettingsTab({ initialSettings }: SettingsTabProps) {
           {actionMsg.text}
         </div>
       )}
+
+      {/* Warning Box */}
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-4 flex gap-3 text-sm">
+        <AlertTriangle className="size-5 shrink-0 text-amber-600 mt-0.5" />
+        <div>
+          <h4 className="font-bold text-amber-900">Khu vực cần chú ý</h4>
+          <p className="mt-1 text-amber-700 leading-relaxed">
+            Các thay đổi tại đây là thiết lập lõi của hệ thống và <strong>sẽ được áp dụng trực tiếp lên giao diện website ngay lập tức</strong> sau khi lưu. Vui lòng kiểm tra kỹ thông tin đặc biệt là số điện thoại Hotline và các đường dẫn liên kết trước khi ấn Xác nhận.
+          </p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Thông tin chung */}
