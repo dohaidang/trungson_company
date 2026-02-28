@@ -14,13 +14,7 @@ enum Role {
   CONTRACTOR
 }
 
-enum ProductType {
-  SOLID
-  FOUR_HOLE
-  TWO_HOLE
-  BLOCK
-  DECORATIVE
-}
+
 
 enum OrderStatus {
   PENDING
@@ -69,24 +63,45 @@ model ContractorProfile {
   user User @relation(fields: [userId], references: [id])
 }
 
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Application {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
 model Product {
   id                 String      @id @default(cuid())
   name               String
   slug               String      @unique
   description        String?
-  type               ProductType
+  categoryId         String?
   dimensions         String?     // e.g., "8x8x18cm"
   weight             Float?      // kg/viên
   compressiveStrength Float?     // Mác gạch (Mpa)
   images             String?     // Stored as JSON string (path array)
-  application        String?     // Stored as JSON string (array of applications e.g. ["Xây tường", "Ốp tường"])
   stock              Int         @default(0)
   isPublished        Boolean     @default(true)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 
-  priceTiers PriceTier[]
-  orderItems OrderItem[]
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  applications Application[]
+  priceTiers   PriceTier[]
+  orderItems   OrderItem[]
 }
 
 model PriceTier {

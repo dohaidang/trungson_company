@@ -1,49 +1,74 @@
 'use server';
 
 import prisma from '@/lib/db';
-import type { ProductType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 // Fetch all published products with optional filters
-export async function getProducts(filters?: {
-    types?: string[];
-    search?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    applications?: string[];
-    inStock?: boolean;
+export async function getProducts(options?: {
+    page?: number;
+    limit?: number;
+    query?: string;
+    filters?: {
+        types?: string[];
+        search?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        applications?: string[];
+        inStock?: boolean;
+    };
+    sortBy?: string;
 }) {
+    const {
+        page = 1,
+        limit = 12,
+        query = "",
+        filters = {},
+        sortBy = "newest"
+    } = options || {};
+
+    const skip = (page - 1) * limit;
+
     try {
-        const where: Record<string, any> = { isPublished: true };
+        const where: any = { isPublished: true };
 
-        // 1. Filter by Types (array)
-        if (filters?.types && filters.types.length > 0) {
-            where.type = { in: filters.types as ProductType[] };
-        }
-
-        // 2. Filter by Search keyword
-        if (filters?.search) {
+        // 1. Search Query
+        if (query) {
             where.OR = [
-                { name: { contains: filters.search } },
-                { description: { contains: filters.search } },
+                { name: { contains: query } },
+                { description: { contains: query } },
             ];
         }
 
-        // 3. Filter by Application (using string contains, because it's a JSON string array)
-        if (filters?.applications && filters.applications.length > 0) {
-            if (!where.AND) where.AND = [];
-            // Products must have at least one of the selected applications
-            const appConditions = filters.applications.map(app => ({
-                application: { contains: `"${app}"` }
-            }));
-            where.AND.push({ OR: appConditions });
+        // 2. Filter by Categories (formerly Types)
+        if (filters?.types && filters.types.length > 0) {
+            where.category = { name: { in: filters.types } };
         }
 
-        // 4. Filter by Stock
+        // 3. Filter by Search keyword (Legacy)
+        if (filters?.search) {
+            if (where.OR) {
+                // Do nothing if main query already handles this, or merge
+            } else {
+                where.OR = [
+                    { name: { contains: filters.search } },
+                    { description: { contains: filters.search } },
+                ];
+            }
+        }
+
+        // 4. Filter by Application (using relation)
+        if (filters?.applications && filters.applications.length > 0) {
+            where.applications = {
+                some: { name: { in: filters.applications } }
+            };
+        }
+
+        // 5. Filter by Stock
         if (filters?.inStock) {
             where.stock = { gt: 0 };
         }
 
-        // 5. Filter by Price Range (using priceTiers relation)
+        // 6. Filter by Price Range (using priceTiers relation)
         if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
             const priceCondition: any = {};
             if (filters.minPrice !== undefined) priceCondition.gte = filters.minPrice;
@@ -60,8 +85,12 @@ export async function getProducts(filters?: {
                 priceTiers: {
                     orderBy: { minQuantity: 'asc' },
                 },
+                category: true,
+                applications: true,
             },
-            orderBy: { name: 'asc' },
+            orderBy: { createdAt: 'desc' }, // default sort bypass for now, adjust based on sortBy param later
+            skip,
+            take: limit
         });
 
         return { products, error: null };

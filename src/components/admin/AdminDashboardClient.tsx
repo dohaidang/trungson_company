@@ -28,8 +28,12 @@ import {
   Trash2,
   Edit2,
   Mail,
+  Grid,
+  Layers,
 } from "lucide-react";
 import { updateOrderStatus, toggleProductPublish, deleteProduct, deleteUser, toggleContactReadStatus, deleteContact } from "@/app/actions/admin";
+import { CategoriesTab } from "./CategoriesTab";
+import { ApplicationsTab } from "./ApplicationsTab";
 
 // ===== TYPES =====
 interface StatsData {
@@ -95,12 +99,30 @@ export interface ContactData {
   createdAt: string;
 }
 
+interface CategoryData {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  productsCount: number;
+}
+
+interface ApplicationData {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  productsCount: number;
+}
+
 interface AdminDashboardClientProps {
   stats: StatsData | null;
   orders: OrderData[];
   products: ProductData[];
   users: UserData[];
   contacts: ContactData[];
+  categories: CategoryData[];
+  applications: ApplicationData[];
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -117,17 +139,19 @@ const ROLE_MAP: Record<string, { label: string; color: string }> = {
   customer: { label: "Khách hàng", color: "bg-slate-500/10 text-slate-600 border-slate-500/20" },
 };
 
-type TabKey = "overview" | "orders" | "products" | "users" | "contacts";
+type TabKey = "overview" | "orders" | "products" | "categories" | "applications" | "users" | "contacts";
 
 const SIDEBAR_ITEMS = [
   { key: "overview" as TabKey, label: "Tổng Quan", icon: LayoutDashboard },
   { key: "orders" as TabKey, label: "Đơn Hàng", icon: ShoppingCart },
   { key: "products" as TabKey, label: "Sản Phẩm", icon: Package },
+  { key: "categories" as TabKey, label: "Loại SP", icon: Grid },
+  { key: "applications" as TabKey, label: "Ứng dụng", icon: Layers },
   { key: "users" as TabKey, label: "Người Dùng", icon: Users },
   { key: "contacts" as TabKey, label: "Liên Hệ", icon: Mail },
 ];
 
-export function AdminDashboardClient({ stats, orders, products, users, contacts }: AdminDashboardClientProps) {
+export function AdminDashboardClient({ stats, orders, products, users, contacts, categories, applications }: AdminDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -139,7 +163,7 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts 
       {/* Dark Sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-[#1e1e2d] text-gray-300 shrink-0">
         <div className="px-5 py-5 border-b border-white/5">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Link href="/" prefetch={true} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-black">TS</div>
             <div>
               <p className="text-sm font-bold text-white">Admin Panel</p>
@@ -272,6 +296,8 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts 
           {activeTab === "overview" && <OverviewTab stats={stats} orders={orders} users={users} />}
           {activeTab === "orders" && <OrdersTab orders={orders} />}
           {activeTab === "products" && <ProductsTab products={products} />}
+          {activeTab === "categories" && <CategoriesTab initialCategories={categories} />}
+          {activeTab === "applications" && <ApplicationsTab initialApplications={applications} />}
           {activeTab === "users" && <UsersTab users={users} />}
           {activeTab === "contacts" && <ContactsTab contacts={contacts} />}
         </div>

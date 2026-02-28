@@ -14,6 +14,8 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { createProduct, updateProduct } from "@/app/actions/admin";
+import { getCategories } from "@/app/actions/category";
+import { getApplications } from "@/app/actions/application";
 
 // ===== TYPES =====
 interface PriceTierInput {
@@ -24,7 +26,7 @@ interface PriceTierInput {
 
 interface ProductFormData {
   name: string;
-  type: string;
+  categoryId: string;
   description: string;
   dimensions: string;
   weight: number | null;
@@ -32,7 +34,7 @@ interface ProductFormData {
   isPublished: boolean;
   priceTiers: PriceTierInput[];
   images: string[];
-  application: string[];
+  applicationIds: string[];
   stock: number;
 }
 
@@ -42,25 +44,17 @@ interface ProductFormProps {
   initialData?: ProductFormData;
 }
 
-const PRODUCT_TYPES = [
-  { value: "SOLID", label: "Gạch Đặc" },
-  { value: "FOUR_HOLE", label: "Gạch 4 Lỗ" },
-  { value: "TWO_HOLE", label: "Gạch 2 Lỗ" },
-  { value: "BLOCK", label: "Gạch Block" },
-  { value: "DECORATIVE", label: "Gạch Trang Trí" },
-];
-
 const DEFAULT_FORM: ProductFormData = {
   name: "",
-  type: "SOLID",
+  categoryId: "",
   description: "",
   dimensions: "",
   weight: null,
   compressiveStrength: null,
   isPublished: true,
-  priceTiers: [{ minQuantity: 0, maxQuantity: 999, unitPrice: 0 }],
+  priceTiers: [{ minQuantity: 0, maxQuantity: null, unitPrice: 0 }],
   images: [],
-  application: [],
+  applicationIds: [],
   stock: 0,
 };
 
@@ -70,6 +64,22 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
   const [form, setForm] = useState<ProductFormData>(initialData || DEFAULT_FORM);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+  const [applications, setApplications] = useState<{id: string, name: string}[]>([]);
+
+  import("react").then((m) => {
+    m.useEffect(() => {
+      async function loadData() {
+        const [{ categories: cats }, { applications: apps }] = await Promise.all([
+          getCategories(),
+          getApplications()
+        ]);
+        if (cats) setCategories(cats);
+        if (apps) setApplications(apps);
+      }
+      loadData();
+    }, []);
+  });
 
   const updateField = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -176,7 +186,7 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
     startTransition(async () => {
       const payload = {
         name: form.name.trim(),
-        type: form.type,
+        categoryId: form.categoryId || undefined,
         description: form.description.trim() || undefined,
         dimensions: form.dimensions.trim() || undefined,
         weight: form.weight,
@@ -184,7 +194,7 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
         isPublished: form.isPublished,
         priceTiers: form.priceTiers,
         images: form.images.filter((img) => img.trim() !== ""),
-        application: form.application,
+        applicationIds: form.applicationIds || [],
         stock: form.stock,
       };
 
@@ -251,13 +261,17 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
                   className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
               </div>
 
-              {/* Type */}
+              {/* Type -> Category */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5">Loại sản phẩm *</label>
-                <select value={form.type} onChange={(e) => updateField("type", e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white">
-                  {PRODUCT_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5">Loại sản phẩm (Danh mục) *</label>
+                <select 
+                  value={form.categoryId} 
+                  onChange={(e) => updateField("categoryId", e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white cursor-pointer"
+                >
+                  <option value="" disabled>-- Chọn một loại sản phẩm --</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>
@@ -294,27 +308,40 @@ export function ProductForm({ mode, productId, initialData }: ProductFormProps) 
                   className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none" />
               </div>
 
-              {/* Application Filter Tags */}
+              {/* Application Filter Checkboxes */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-gray-500 mb-1.5">Ứng dụng (để làm bộ lọc)</label>
-                <div className="flex flex-wrap gap-2">
-                  {["Xây tường", "Ốp tường", "Lát nền", "Trang trí", "Hạ tầng (vỉa hè)", "Đổ móng"].map((app) => (
-                    <label key={app} className="flex items-center gap-2 cursor-pointer bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                      <input 
-                        type="checkbox" 
-                        checked={form.application.includes(app)}
-                        onChange={(e) => {
-                          const newApp = e.target.checked 
-                            ? [...form.application, app] 
-                            : form.application.filter(a => a !== app);
-                          updateField("application", newApp);
-                        }}
-                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <span className="text-sm font-medium text-gray-700">{app}</span>
-                    </label>
-                  ))}
-                </div>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5">Ứng dụng (Chọn nhiều)</label>
+                {applications.length > 0 ? (
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    {applications.map((app) => {
+                      const isSelected = form.applicationIds?.includes(app.id);
+                      return (
+                        <label key={app.id} className={`inline-flex items-center gap-2 border px-3 py-2 rounded-lg text-sm cursor-pointer select-none transition-colors ${isSelected ? "border-primary bg-primary/5 font-medium text-primary" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"}`}>
+                          <input 
+                            type="checkbox" 
+                            className="hidden"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              const currentIds = form.applicationIds || [];
+                              if (checked) {
+                                updateField("applicationIds", [...currentIds, app.id]);
+                              } else {
+                                updateField("applicationIds", currentIds.filter(id => id !== app.id));
+                              }
+                            }}
+                          />
+                          <div className={`size-4 rounded border flex items-center justify-center ${isSelected ? "bg-primary border-primary text-white" : "border-gray-300"}`}>
+                            {isSelected && <CheckCircle2 className="size-3" />}
+                          </div>
+                          {app.name}
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 italic py-2">Chưa có ứng dụng nào trong hệ thống. Vui lòng tạo Ứng dụng ở trang Quản lý Ứng dụng.</p>
+                )}
               </div>
 
               {/* Stock */}

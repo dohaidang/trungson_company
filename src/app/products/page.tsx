@@ -4,17 +4,16 @@ import { ProductFilter } from "@/components/products/ProductFilter";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Pagination } from "@/components/ui/pagination";
 import { getProducts } from "@/app/actions/product";
-import type { ProductType } from "@prisma/client";
 
-// Map product type to display badge
-function getProductBadges(type: string): { text: string; color: "red" | "gray" }[] {
-  switch (type) {
-    case "SOLID": return [{ text: "Đặc", color: "red" }];
-    case "FOUR_HOLE": return [{ text: "4 Lỗ", color: "gray" }];
-    case "TWO_HOLE": return [{ text: "2 Lỗ", color: "gray" }];
-    case "BLOCK": return [{ text: "Block", color: "gray" }];
-    case "DECORATIVE": return [{ text: "Trang Trí", color: "red" }];
-    default: return [];
+function getProductBadges(categoryName: string): { text: string; color: "red" | "gray" }[] {
+  if (!categoryName) return [];
+  switch (categoryName.toLowerCase()) {
+    case "gạch đặc": return [{ text: "Đặc", color: "red" }];
+    case "gạch 4 lỗ": return [{ text: "4 Lỗ", color: "gray" }];
+    case "gạch 2 lỗ": return [{ text: "2 Lỗ", color: "gray" }];
+    case "gạch block": return [{ text: "Block", color: "gray" }];
+    case "gạch trang trí": return [{ text: "Trang Trí", color: "red" }];
+    default: return [{ text: categoryName, color: "gray" }];
   }
 }
 
@@ -28,9 +27,7 @@ function parseImages(images: string | null): string[] {
   }
 }
 
-export default async function ProductsPage({
-  searchParams,
-}: {
+export default async function ProductsPage(props: {
   searchParams: Promise<{ 
     type?: string; 
     search?: string;
@@ -40,14 +37,16 @@ export default async function ProductsPage({
     inStock?: string;
   }>;
 }) {
-  const params = await searchParams;
+  const searchParams = await props.searchParams;
   const { products } = await getProducts({
-    types: params.type ? params.type.split(',') : undefined,
-    search: params.search,
-    minPrice: params.minPrice ? parseInt(params.minPrice) : undefined,
-    maxPrice: params.maxPrice ? parseInt(params.maxPrice) : undefined,
-    applications: params.applications ? params.applications.split(',') : undefined,
-    inStock: params.inStock === 'true' ? true : undefined,
+    filters: {
+        types: searchParams.type ? searchParams.type.split(',') : undefined,
+        applications: searchParams.applications ? searchParams.applications.split(',') : undefined,
+        inStock: searchParams.inStock === 'true' ? true : undefined,
+        search: searchParams.search,
+        minPrice: searchParams.minPrice ? parseInt(searchParams.minPrice) : undefined,
+        maxPrice: searchParams.maxPrice ? parseInt(searchParams.maxPrice) : undefined,
+    }
   });
 
   return (
@@ -92,7 +91,10 @@ export default async function ProductsPage({
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
-          <ProductFilter />
+          <ProductFilter 
+            availableTypes={Array.from(new Set(products.map(p => p.category?.name).filter(Boolean) as string[]))} 
+            availableApplications={Array.from(new Set(products.flatMap(p => p.applications.map(a => a.name)).filter(Boolean)))}
+          />
 
           {/* Product Grid */}
           <main className="flex-1">
@@ -116,7 +118,7 @@ export default async function ProductsPage({
                         description={product.description || ""}
                         price={basePrice}
                         image={firstImage}
-                        badges={getProductBadges(product.type)}
+                        badges={getProductBadges(product.category?.name || '')}
                       />
                     );
                   })}

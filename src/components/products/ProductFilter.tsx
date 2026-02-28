@@ -4,24 +4,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { X } from "lucide-react";
 
-const TYPES = [
-  { value: "SOLID", label: "Gạch Đặc" },
-  { value: "FOUR_HOLE", label: "Gạch 4 Lỗ" },
-  { value: "TWO_HOLE", label: "Gạch 2 Lỗ" },
-  { value: "BLOCK", label: "Gạch Block" },
-  { value: "DECORATIVE", label: "Gạch Trang Trí" },
-];
-
-const APPLICATIONS = [
-  "Xây tường",
-  "Ốp tường",
-  "Lát nền",
-  "Trang trí",
-  "Hạ tầng (vỉa hè)",
-  "Đổ móng"
-];
-
-export function ProductFilter() {
+export function ProductFilter({ 
+  availableTypes, 
+  availableApplications 
+}: { 
+  availableTypes: string[]; 
+  availableApplications: string[]; 
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -76,37 +65,43 @@ export function ProductFilter() {
         </div>
 
         {/* Type Filter */}
-        <FilterSection title="Loại Gạch">
-          {TYPES.map(type => (
-            <CheckboxItem 
-              key={type.value}
-              label={type.label} 
-              checked={currentTypes.includes(type.value)}
-              onChange={() => toggleArrayParam("type", type.value, currentTypes)}
-            />
-          ))}
-        </FilterSection>
-
-        <Separator />
+        {availableTypes.length > 0 && (
+          <>
+            <FilterSection title="Loại Gạch">
+              {availableTypes.map(type => (
+                <CheckboxItem 
+                  key={type}
+                  label={type} 
+                  checked={currentTypes.includes(type)}
+                  onChange={() => toggleArrayParam("type", type, currentTypes)}
+                />
+              ))}
+            </FilterSection>
+            <Separator />
+          </>
+        )}
 
         {/* Application Filter */}
-        <FilterSection title="Ứng Dụng">
-          {APPLICATIONS.map(app => (
-            <CheckboxItem 
-              key={app}
-              label={app} 
-              checked={currentApps.includes(app)}
-              onChange={() => toggleArrayParam("applications", app, currentApps)}
-            />
-          ))}
-        </FilterSection>
-
-        <Separator />
+        {availableApplications.length > 0 && (
+          <>
+            <FilterSection title="Ứng Dụng">
+              {availableApplications.map(app => (
+                <CheckboxItem 
+                  key={app}
+                  label={app} 
+                  checked={currentApps.includes(app)}
+                  onChange={() => toggleArrayParam("applications", app, currentApps)}
+                />
+              ))}
+            </FilterSection>
+            <Separator />
+          </>
+        )}
 
         {/* Stock Filter */}
         <FilterSection title="Tình Trạng">
           <CheckboxItem 
-              label="Chỉ hiện Còn Bán / Có Tồn Khi" 
+              label="Chỉ hiện Còn Bán / Có Tồn Kho" 
               checked={inStock}
               onChange={(e) => {
                 router.replace(`?${createQueryString("inStock", e.target.checked ? "true" : "")}`, { scroll: false });

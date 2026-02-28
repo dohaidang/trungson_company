@@ -185,6 +185,8 @@ export async function getAdminProducts() {
         const products = await prisma.product.findMany({
             include: {
                 priceTiers: { orderBy: { minQuantity: 'asc' } },
+                category: true,
+                applications: true,
                 _count: { select: { orderItems: true } },
             },
             orderBy: { name: 'asc' },
@@ -194,12 +196,12 @@ export async function getAdminProducts() {
             id: p.id,
             name: p.name,
             slug: p.slug,
-            type: p.type,
+            type: p.category?.name || 'Chưa phân loại',
             price: p.priceTiers[0]?.unitPrice || 0,
             isPublished: p.isPublished,
             totalSold: p._count.orderItems,
             stock: p.stock,
-            application: p.application ? JSON.parse(p.application) : [],
+            application: p.applications.map(a => a.name),
             dimensions: p.dimensions || '',
         }));
 
@@ -468,7 +470,7 @@ const priceTierSchema = z.object({
 
 const productSchema = z.object({
     name: z.string().min(3, 'Tên sản phẩm tối thiểu 3 ký tự'),
-    type: z.enum(['SOLID', 'FOUR_HOLE', 'TWO_HOLE', 'BLOCK', 'DECORATIVE']),
+    categoryId: z.string().min(1, 'Vui lòng chọn loại sản phẩm').nullable().optional(),
     description: z.string().optional(),
     dimensions: z.string().optional(),
     weight: z.number().positive().nullable().optional(),
@@ -476,7 +478,7 @@ const productSchema = z.object({
     isPublished: z.boolean().default(true),
     priceTiers: z.array(priceTierSchema).min(1, 'Cần ít nhất 1 mức giá'),
     images: z.array(z.string()).optional().default([]),
-    application: z.array(z.string()).optional().default([]),
+    applicationIds: z.array(z.string()).optional().default([]),
     stock: z.number().int().min(0).default(0),
 });
 
@@ -502,6 +504,7 @@ export async function getProductForEdit(productId: string) {
             where: { id: productId },
             include: {
                 priceTiers: { orderBy: { minQuantity: 'asc' } },
+                applications: true,
             },
         });
 
@@ -527,13 +530,13 @@ export async function getProductForEdit(productId: string) {
                 name: product.name,
                 slug: product.slug,
                 description: product.description || '',
-                type: product.type,
+                categoryId: product.categoryId || '',
                 dimensions: product.dimensions || '',
                 weight: product.weight,
                 compressiveStrength: product.compressiveStrength,
                 isPublished: product.isPublished,
                 images: parsedImages,
-                application: product.application ? JSON.parse(product.application) : [],
+                applicationIds: product.applications.map(a => a.id),
                 stock: product.stock,
                 priceTiers: product.priceTiers.map(t => ({
                     id: t.id,
@@ -553,13 +556,15 @@ export async function getProductForEdit(productId: string) {
 // Create a new product
 export async function createProduct(data: {
     name: string;
-    type: string;
+    categoryId?: string | null;
     description?: string;
     dimensions?: string;
     weight?: number | null;
     compressiveStrength?: number | null;
     isPublished?: boolean;
     priceTiers: { minQuantity: number; maxQuantity: number | null; unitPrice: number }[];
+    images?: string[];
+    applicationIds?: string[];
 }) {
     try {
         const { error } = await verifyAdmin();
@@ -588,12 +593,15 @@ export async function createProduct(data: {
                     name: validated.name,
                     slug,
                     description: validated.description || null,
-                    type: validated.type as 'SOLID' | 'FOUR_HOLE' | 'TWO_HOLE' | 'BLOCK' | 'DECORATIVE',
+                    categoryId: validated.categoryId || null,
                     dimensions: validated.dimensions || null,
                     weight: validated.weight ?? null,
                     compressiveStrength: validated.compressiveStrength ?? null,
                     isPublished: validated.isPublished,
                     images: JSON.stringify(validated.images),
+                    applications: {
+                        connect: validated.applicationIds.map(id => ({ id }))
+                    },
                 },
             });
 
@@ -620,13 +628,15 @@ export async function createProduct(data: {
 // Update an existing product
 export async function updateProduct(productId: string, data: {
     name: string;
-    type: string;
+    categoryId?: string | null;
     description?: string;
     dimensions?: string;
     weight?: number | null;
     compressiveStrength?: number | null;
     isPublished?: boolean;
     priceTiers: { minQuantity: number; maxQuantity: number | null; unitPrice: number }[];
+    images?: string[];
+    applicationIds?: string[];
 }) {
     try {
         const { error } = await verifyAdmin();
@@ -665,12 +675,15 @@ export async function updateProduct(productId: string, data: {
                     name: validated.name,
                     slug,
                     description: validated.description || null,
-                    type: validated.type as 'SOLID' | 'FOUR_HOLE' | 'TWO_HOLE' | 'BLOCK' | 'DECORATIVE',
+                    categoryId: validated.categoryId || null,
                     dimensions: validated.dimensions || null,
                     weight: validated.weight ?? null,
                     compressiveStrength: validated.compressiveStrength ?? null,
                     isPublished: validated.isPublished,
                     images: JSON.stringify(validated.images),
+                    applications: {
+                        set: validated.applicationIds.map(id => ({ id }))
+                    },
                 },
             });
 
