@@ -304,7 +304,7 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts,
         </div>
 
         <div className="p-4 sm:p-6 lg:p-8">
-          {activeTab === "overview" && <OverviewTab stats={stats} orders={orders} users={users} />}
+          {activeTab === "overview" && <OverviewTab stats={stats} orders={orders} users={users} setActiveTab={setActiveTab} />}
           {activeTab === "orders" && <OrdersTab orders={orders} />}
           {activeTab === "products" && <ProductsTab products={products} />}
           {activeTab === "categories" && <CategoriesTab initialCategories={categories} />}
@@ -321,7 +321,7 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts,
 /* ============================= */
 /* ========= OVERVIEW ========= */
 /* ============================= */
-function OverviewTab({ stats, orders, users }: { stats: StatsData | null; orders: OrderData[]; users: UserData[] }) {
+function OverviewTab({ stats, orders, users, setActiveTab }: { stats: StatsData | null; orders: OrderData[]; users: UserData[]; setActiveTab: (tab: TabKey) => void }) {
   if (!stats) {
     return <div className="text-center py-12 text-gray-400">Không thể tải dữ liệu thống kê.</div>;
   }
@@ -390,7 +390,10 @@ function OverviewTab({ stats, orders, users }: { stats: StatsData | null; orders
             <ArrowUpRight className="size-4 text-gray-300" />
           </div>
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50">
+            <div 
+              onClick={() => setActiveTab("contacts")}
+              className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 hover:bg-amber-100 cursor-pointer transition-colors"
+            >
               <Bell className="size-5 text-amber-500" />
               <div>
                 <p className="text-sm font-bold text-gray-900">{stats.unreadContacts} liên hệ chưa đọc</p>
@@ -398,7 +401,11 @@ function OverviewTab({ stats, orders, users }: { stats: StatsData | null; orders
               </div>
             </div>
             {stats.ordersByStatus.filter(s => s.status === 'PENDING').map(s => (
-              <div key={s.status} className="flex items-center gap-3 p-3 rounded-lg bg-blue-50">
+              <div 
+                key={s.status} 
+                onClick={() => setActiveTab("orders")}
+                className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 cursor-pointer transition-colors"
+              >
                 <Clock className="size-5 text-blue-500" />
                 <div>
                   <p className="text-sm font-bold text-gray-900">{s.count} đơn chờ xử lý</p>
