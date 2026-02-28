@@ -143,7 +143,7 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts 
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-black">TS</div>
             <div>
               <p className="text-sm font-bold text-white">Admin Panel</p>
-              <p className="text-[10px] text-gray-500">Trung Sơn Company</p>
+              <p className="text-[10px] text-gray-500">CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN</p>
             </div>
           </Link>
         </div>

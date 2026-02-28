@@ -3,8 +3,8 @@ import { Building2, Target, Eye, Users, Award, Clock, Truck, ShieldCheck } from 
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Giới Thiệu | Trung Sơn Company",
-  description: "Tìm hiểu về Trung Sơn Company - 15 năm kinh nghiệm cung cấp vật liệu xây dựng cao cấp cho hơn 5000 nhà thầu trên khắp Việt Nam.",
+  title: "Giới Thiệu | CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN",
+  description: "Tìm hiểu về CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN - 15 năm kinh nghiệm cung cấp vật liệu xây dựng cao cấp cho hơn 5000 nhà thầu trên khắp Việt Nam.",
 };
 
 // Timeline data
@@ -41,7 +41,7 @@ export default function AboutPage() {
       <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
         <Image
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbAP2lKJ7BC25G14XiZSsAp5ooblqYdTqq-zLA4_PHWPutdZ18C923BLZA25Hl3fmkYnjVCa4B18xlEQsTjLzacK_wcBjmetjGT-LK-pP2YO6gApfJtPzYBjtRRklBOnnobtkfHhZi91GnIH6G97SMnCkZYD4JST3cFi3iGzIStC8aJo0HDJux-oojR_8g50spmxKhXX4NYl6Tm7sysT3e6GpkiJL_uANFqFAJiltVNSRqxWj_zSTjJIYuZNM898Mi4JFd2eZRD8Y"
-          alt="Trung Sơn Company Factory"
+          alt="CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN Factory"
           fill
           className="object-cover"
           priority
@@ -50,7 +50,7 @@ export default function AboutPage() {
         <div className="relative z-10 text-center text-white px-4 max-w-3xl">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary mb-4">Về Chúng Tôi</p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-4">
-            Trung Sơn Company
+            CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN
           </h1>
           <p className="text-lg md:text-xl font-light text-gray-300 leading-relaxed">
             15 năm xây dựng niềm tin — Nhà cung cấp vật liệu xây dựng hàng đầu miền Nam Việt Nam.

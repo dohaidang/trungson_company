@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Trung Sơn Company",
+  title: "CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN",
   description: "Cung cấp vật liệu xây dựng cao cấp - Gạch, Block, Vật liệu xây dựng chất lượng cao",
 };
 

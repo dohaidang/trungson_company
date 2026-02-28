@@ -32,7 +32,7 @@ export function Header() {
               <Home className="size-5" />
             </div>
             <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Trung Sơn Company
+              Công ty CP TM & SX VLXD Trung Sơn
             </h1>
           </Link>
 

@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
                 <div className="size-16 bg-primary flex items-center justify-center rounded-sm mb-4 shadow-lg shadow-primary/20">
                     <Grid3x3 className="text-white size-8" />
                 </div>
-                <h1 className="text-2xl font-bold text-foreground uppercase tracking-wider">Trung Sơn Company</h1>
+                <h1 className="text-2xl font-bold text-foreground uppercase tracking-wider">CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN</h1>
                 <p className="text-sm text-muted-foreground mt-1 uppercase tracking-[0.2em]">Building Excellence</p>
             </div>
 
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
             {/* Footer */}
             <footer className="mt-8 text-center">
                 <p className="text-xs text-muted-foreground tracking-wide">
-                    © 2024 Trung Sơn Company. All rights reserved. <br />
+                    © 2024 CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN. All rights reserved. <br />
                     Chất lượng vững bền - Kiến trúc hoàn mỹ
                 </p>
             </footer>

@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const project = PROJECTS_DATA.find((p) => p.id === id);
   if (!project) return { title: "Dự án không tồn tại" };
   return {
-    title: `${project.title} | Trung Sơn Company`,
+    title: `${project.title} | CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN`,
     description: project.description,
   };
 }

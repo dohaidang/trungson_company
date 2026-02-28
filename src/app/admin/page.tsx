@@ -5,8 +5,8 @@ import { getAdminStats, getAdminOrders, getAdminProducts, getAdminUsers, getAdmi
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard | Trung Sơn Company',
-  description: 'Quản lý hệ thống Trung Sơn Company.',
+  title: 'Admin Dashboard | CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN',
+  description: 'Quản lý hệ thống CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN.',
 };
 
 export default async function AdminPage() {

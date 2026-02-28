@@ -11,7 +11,7 @@ export function Footer() {
               <div className="flex size-6 items-center justify-center rounded bg-primary text-primary-foreground">
                 <Home className="size-4" />
               </div>
-              <span className="font-bold text-foreground">Trung Sơn Company</span>
+              <span className="font-bold text-foreground">CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN</span>
             </div>
             <p className="text-sm text-muted-foreground">
                 Xây dựng nền móng ước mơ của bạn với gạch và vật liệu xây dựng chất lượng cao.
@@ -55,7 +55,7 @@ export function Footer() {
         </div>
         
         <div className="mt-12 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            © 2026 Trung Sơn Company. All rights reserved.
+            © 2026 CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN. All rights reserved.
         </div>
       </div>
     </footer>

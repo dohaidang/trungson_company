@@ -6,7 +6,7 @@ import { getUserProfile } from '@/app/actions/user';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Trung Sơn Company',
+  title: 'Dashboard | CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN',
   description: 'Quản lý đơn hàng, theo dõi vận chuyển và cập nhật thông tin cá nhân.',
 };
 

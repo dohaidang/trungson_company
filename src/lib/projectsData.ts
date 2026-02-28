@@ -32,7 +32,7 @@ export const PROJECTS_DATA: Project[] = [
         client: "Công ty CP Đầu tư Villa Park",
         area: "12,000 m²",
         description: "Cung cấp toàn bộ gạch tuynel và gạch ốp trang trí cho khu biệt thự cao cấp 48 căn.",
-        longDescription: "Dự án Villa Park là khu biệt thự cao cấp gồm 48 căn biệt thự liền kề và biệt thự đơn lập tại Quận 9, TP.HCM. Trung Sơn Company đã được tin tưởng cung cấp toàn bộ vật liệu xây dựng chính bao gồm gạch tuynel chịu lực, gạch block cách nhiệt và gạch ốp trang trí mặt tiền. Quá trình cung cấp kéo dài 18 tháng với cam kết giao hàng đúng tiến độ từng giai đoạn.",
+        longDescription: "Dự án Villa Park là khu biệt thự cao cấp gồm 48 căn biệt thự liền kề và biệt thự đơn lập tại Quận 9, TP.HCM. CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN đã được tin tưởng cung cấp toàn bộ vật liệu xây dựng chính bao gồm gạch tuynel chịu lực, gạch block cách nhiệt và gạch ốp trang trí mặt tiền. Quá trình cung cấp kéo dài 18 tháng với cam kết giao hàng đúng tiến độ từng giai đoạn.",
         materials: ["Gạch Tuynel Tiêu Chuẩn", "Gạch Block 4 Lỗ", "Gạch Ốp Tường Xám Đá", "Gạch Đỏ Đặc"],
         images: [
             "https://lh3.googleusercontent.com/aida-public/AB6AXuBOkOJMeXYpJ0f4HbwY7XwdaV1MHUpX0i9poi5ObN_p7Jl7XDVT8OxVOhO7QSsi7BBNM2ggQEJYH4S69HwudQk9KL2qezdCfXZp7vAHkCevvWQamiCjtHArq8O4gTffvZN-3tWcsujN6STEiAi7NZnG73cVf3_DmGaQ4AJD4ihfUgxxGdNt2N_jDWBw4k1aF6yHJZUhuaPlyiKbA9Q20DOioiXmCUluvz9ArqicUBknkLhUT6ktJV3onII0nnFLaA31JIEle2COzU8",

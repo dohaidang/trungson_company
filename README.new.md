@@ -1,6 +1,6 @@
-# website e-commerce Vật Liệu Xây Dựng - Trung Sơn Company 🏗️
+# website e-commerce Vật Liệu Xây Dựng - CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN 🏗️
 
-Đây là mã nguồn hệ thống thương mại điện tử chuyên dụng cho **Vật Liệu Xây Dựng** của Trung Sơn Company. Được xây dựng trên nền tảng **Next.js 15**, hệ thống mang đến hiệu suất tối đa, trải nghiệm người dùng hiện đại cùng một công cụ quản trị (Admin Dashboard) mạnh mẽ và bảo mật.
+Đây là mã nguồn hệ thống thương mại điện tử chuyên dụng cho **Vật Liệu Xây Dựng** của CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN. Được xây dựng trên nền tảng **Next.js 15**, hệ thống mang đến hiệu suất tối đa, trải nghiệm người dùng hiện đại cùng một công cụ quản trị (Admin Dashboard) mạnh mẽ và bảo mật.
 
 ## 🚀 Công Nghệ Sử Dụng
 
@@ -57,4 +57,4 @@ Tiếp theo, hãy mở trình duyệt truy cập địa chỉ [http://localhost:
 
 ---
 
-> Trung Sơn Company - Uy Tín Tạo Dựng Công Trình 🏗️ 
+> CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN - Uy Tín Tạo Dựng Công Trình 🏗️ 

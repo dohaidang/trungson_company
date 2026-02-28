@@ -88,7 +88,7 @@ export default function RegisterPage() {
                 Tạo tài khoản
               </h2>
               <p className="text-muted-foreground mt-2">
-                Gia nhập cộng đồng Trung Sơn Company ngay hôm nay.
+                Gia nhập cộng đồng CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN ngay hôm nay.
               </p>
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function RegisterPage() {
                 >
                   Điều khoản & Điều kiện
                 </Link>{" "}
-                và chính sách bảo mật của Trung Sơn Company.
+                và chính sách bảo mật của CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN.
               </label>
             </div>
 
@@ -277,7 +277,7 @@ export default function RegisterPage() {
 
           {/* Professional Footer */}
           <div className="mt-8 flex flex-col md:flex-row justify-between items-center text-muted-foreground text-xs px-4">
-            <p>© 2024 Trung Sơn Company. Tất cả quyền được bảo lưu.</p>
+            <p>© 2024 CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN. Tất cả quyền được bảo lưu.</p>
             <div className="flex gap-6 mt-4 md:mt-0 uppercase tracking-widest font-medium">
               <Link href="#" className="hover:text-primary transition-colors">
                 Hỗ trợ

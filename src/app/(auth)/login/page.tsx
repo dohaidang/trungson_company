@@ -88,7 +88,7 @@ function LoginContent() {
                 <Home className="size-6" />
               </div>
               <span className="text-2xl font-bold tracking-tighter text-foreground uppercase">
-                Trung Sơn Company
+                CÔNG TY CỔ PHẦN THƯƠNG MẠI VÀ SẢN XUẤT VẬT LIỆU XÂY DỰNG TRUNG SƠN
               </span>
             </Link>
             <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">
