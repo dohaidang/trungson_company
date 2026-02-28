@@ -21,21 +21,21 @@ export function Footer() {
           <div className="flex gap-16 flex-wrap">
             <div className="flex flex-col gap-3">
               <h4 className="font-bold text-foreground">Cửa Hàng</h4>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Tất Cả Sản Phẩm</Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Bán Chạy Nhất</Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Hàng Mới Về</Link>
+              <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Tất Cả Sản Phẩm</Link>
+              <Link href="/products?sort=popular" className="text-sm text-muted-foreground hover:text-primary transition-colors">Bán Chạy Nhất</Link>
+              <Link href="/products?sort=newest" className="text-sm text-muted-foreground hover:text-primary transition-colors">Hàng Mới Về</Link>
             </div>
             <div className="flex flex-col gap-3">
               <h4 className="font-bold text-foreground">Công Ty</h4>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Về Chúng Tôi</Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Liên Hệ</Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Chính Sách Bảo Mật</Link>
+              <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">Về Chúng Tôi</Link>
+              <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Liên Hệ</Link>
+              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Chính Sách Bảo Mật</Link>
             </div>
             <div className="flex flex-col gap-3">
               <h4 className="font-bold text-foreground">Hỗ Trợ</h4>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Thông Tin Vận Chuyển</Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Đổi Trả</Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Hướng Dẫn Tính Toán</Link>
+              <Link href="/shipping" className="text-sm text-muted-foreground hover:text-primary transition-colors">Thông Tin Vận Chuyển</Link>
+              <Link href="/returns" className="text-sm text-muted-foreground hover:text-primary transition-colors">Đổi Trả</Link>
+              <Link href="/calculator" className="text-sm text-muted-foreground hover:text-primary transition-colors">Hướng Dẫn Tính Toán</Link>
             </div>
           </div>
         </div>
