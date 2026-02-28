@@ -1,6 +1,6 @@
 import { MapPin, Phone, Mail, Headset } from "lucide-react";
 
-export function ShowroomList() {
+export function ShowroomList({ settings }: { settings?: Record<string, string> }) {
   return (
     <div className="flex flex-col gap-8">
       <h3 className="text-xl font-bold uppercase text-foreground border-l-4 border-primary pl-4">
@@ -76,7 +76,7 @@ export function ShowroomList() {
           <Headset className="size-10 text-primary-foreground/90" />
           <div>
             <span className="block text-2xl font-black tracking-tighter text-primary-foreground">
-              1900 8000
+              {settings?.CONTACT_HOTLINE || "1900 8000"}
             </span>
             <span className="text-[10px] uppercase tracking-widest text-primary-foreground/70">
               Thứ 2 - Thứ 7 | 08:00 - 18:00

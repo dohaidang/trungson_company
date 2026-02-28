@@ -34,6 +34,7 @@ import {
 import { updateOrderStatus, toggleProductPublish, deleteProduct, deleteUser, toggleContactReadStatus, deleteContact } from "@/app/actions/admin";
 import { CategoriesTab } from "./CategoriesTab";
 import { ApplicationsTab } from "./ApplicationsTab";
+import { SettingsTab } from "./SettingsTab";
 
 // ===== TYPES =====
 interface StatsData {
@@ -123,6 +124,7 @@ interface AdminDashboardClientProps {
   contacts: ContactData[];
   categories: CategoryData[];
   applications: ApplicationData[];
+  settings: Record<string, string>;
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -139,7 +141,7 @@ const ROLE_MAP: Record<string, { label: string; color: string }> = {
   customer: { label: "Khách hàng", color: "bg-slate-500/10 text-slate-600 border-slate-500/20" },
 };
 
-type TabKey = "overview" | "orders" | "products" | "categories" | "applications" | "users" | "contacts";
+type TabKey = "overview" | "orders" | "products" | "categories" | "applications" | "users" | "contacts" | "settings";
 
 const SIDEBAR_ITEMS = [
   { key: "overview" as TabKey, label: "Tổng Quan", icon: LayoutDashboard },
@@ -149,9 +151,10 @@ const SIDEBAR_ITEMS = [
   { key: "applications" as TabKey, label: "Ứng dụng", icon: Layers },
   { key: "users" as TabKey, label: "Người Dùng", icon: Users },
   { key: "contacts" as TabKey, label: "Liên Hệ", icon: Mail },
+  { key: "settings" as TabKey, label: "Cài Đặt", icon: Settings },
 ];
 
-export function AdminDashboardClient({ stats, orders, products, users, contacts, categories, applications }: AdminDashboardClientProps) {
+export function AdminDashboardClient({ stats, orders, products, users, contacts, categories, applications, settings }: AdminDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -300,6 +303,7 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts,
           {activeTab === "applications" && <ApplicationsTab initialApplications={applications} />}
           {activeTab === "users" && <UsersTab users={users} />}
           {activeTab === "contacts" && <ContactsTab contacts={contacts} />}
+          {activeTab === "settings" && <SettingsTab initialSettings={settings} />}
         </div>
       </main>
     </div>

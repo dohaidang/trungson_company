@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ShoppingCart, Menu, Home, X, Search } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 
-export function Header() {
+export function Header({ settings }: { settings?: Record<string, string> }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +32,7 @@ export function Header() {
               <Home className="size-5" />
             </div>
             <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Công ty CP TM & SX VLXD Trung Sơn
+              {settings?.SITE_NAME || "Công ty CP TM & SX VLXD Trung Sơn"}
             </h1>
           </Link>
 

@@ -2,8 +2,11 @@ import Link from "next/link";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { ShowroomList } from "@/components/contact/ShowroomList";
 import { ShieldCheck, Truck, Factory, CreditCard } from "lucide-react";
+import { getSettings } from "@/app/actions/setting";
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { settings } = await getSettings();
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="mx-auto w-full px-4 py-16 sm:px-6 lg:px-8">
@@ -25,7 +28,7 @@ export default function ContactPage() {
           <ContactForm />
 
           {/* Showrooms & Info */}
-          <ShowroomList />
+          <ShowroomList settings={settings} />
         </div>
       </main>
 

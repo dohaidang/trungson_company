@@ -4,6 +4,7 @@ import { AdminDashboardClient } from '@/components/admin/AdminDashboardClient';
 import { getAdminStats, getAdminOrders, getAdminProducts, getAdminUsers, getAdminContacts } from '@/app/actions/admin';
 import { getCategories } from '@/app/actions/category';
 import { getApplications } from '@/app/actions/application';
+import { getSettings } from '@/app/actions/setting';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -31,7 +32,8 @@ export default async function AdminPage() {
     usersResult, 
     contactsResult,
     categoriesResult,
-    applicationsResult
+    applicationsResult,
+    settingsResult
   ] = await Promise.all([
     getAdminStats(),
     getAdminOrders(),
@@ -40,6 +42,7 @@ export default async function AdminPage() {
     getAdminContacts(),
     getCategories(),
     getApplications(),
+    getSettings(),
   ]);
 
   return (
@@ -51,6 +54,7 @@ export default async function AdminPage() {
       contacts={contactsResult.contacts}
       categories={categoriesResult.categories as any}
       applications={applicationsResult.applications as any}
+      settings={settingsResult.settings}
     />
   );
 }

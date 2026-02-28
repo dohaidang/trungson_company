@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { CartProvider } from "@/lib/CartContext";
+import { getSettings } from "@/app/actions/setting";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,11 +22,13 @@ export const metadata: Metadata = {
   description: "Cung cấp vật liệu xây dựng cao cấp - Gạch, Block, Vật liệu xây dựng chất lượng cao",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settingsResult = await getSettings();
+  const settings = settingsResult.settings || {};
   return (
     <html lang="vi" suppressHydrationWarning>
       <body
@@ -33,9 +36,9 @@ export default function RootLayout({
       >
         <CartProvider>
           <div className="relative flex min-h-screen flex-col w-full overflow-x-hidden">
-            <Header />
+            <Header settings={settings} />
             <main className="flex-1 w-full">{children}</main>
-            <Footer />
+            <Footer settings={settings} />
             <ScrollToTop />
           </div>
         </CartProvider>
