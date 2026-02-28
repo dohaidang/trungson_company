@@ -67,18 +67,18 @@ export function ShowroomList() {
       </div>
 
       {/* Hotline */}
-      <div className="mt-4 bg-foreground text-background p-8 rounded-sm">
+      <div className="mt-4 bg-primary text-primary-foreground p-8 rounded-sm shadow-md">
         <h4 className="font-bold uppercase tracking-wider">Hotline Trực Tiếp</h4>
-        <p className="mt-2 text-sm text-muted-foreground/80">
+        <p className="mt-2 text-sm text-primary-foreground/90">
           Hỗ trợ khẩn cấp và tư vấn mua hàng trực tiếp:
         </p>
         <div className="mt-4 flex items-center gap-4">
-          <Headset className="size-10 text-primary" />
+          <Headset className="size-10 text-primary-foreground/90" />
           <div>
-            <span className="block text-2xl font-black tracking-tighter text-background">
+            <span className="block text-2xl font-black tracking-tighter text-primary-foreground">
               1900 8000
             </span>
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60">
+            <span className="text-[10px] uppercase tracking-widest text-primary-foreground/70">
               Thứ 2 - Thứ 7 | 08:00 - 18:00
             </span>
           </div>
