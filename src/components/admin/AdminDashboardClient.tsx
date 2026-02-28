@@ -151,7 +151,6 @@ const SIDEBAR_ITEMS = [
   { key: "applications" as TabKey, label: "Ứng dụng", icon: Layers },
   { key: "users" as TabKey, label: "Người Dùng", icon: Users },
   { key: "contacts" as TabKey, label: "Liên Hệ", icon: Mail },
-  { key: "settings" as TabKey, label: "Cài Đặt", icon: Settings },
 ];
 
 export function AdminDashboardClient({ stats, orders, products, users, contacts, categories, applications, settings }: AdminDashboardClientProps) {
@@ -187,7 +186,11 @@ export function AdminDashboardClient({ stats, orders, products, users, contacts,
           ))}
           <div className="h-px bg-white/5 my-3" />
           <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Hệ thống</p>
-          <button className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all">
+          <button 
+            onClick={() => setActiveTab("settings")}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+              activeTab === "settings" ? "bg-primary/20 text-primary" : "text-gray-400 hover:bg-white/5 hover:text-white"
+            }`}>
             <Settings className="size-[18px]" /> Cài Đặt
           </button>
           <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all">
