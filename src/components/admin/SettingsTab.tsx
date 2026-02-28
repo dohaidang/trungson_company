@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2, AlertCircle, Loader2, Save, Globe, Phone, Share2, Search as SearchIcon } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2, Save, Globe, Phone, Share2, Search as SearchIcon, UploadCloud, X } from "lucide-react";
 import { updateSettings } from "@/app/actions/setting";
 
 interface SettingsTabProps {
@@ -12,9 +12,10 @@ export function SettingsTab({ initialSettings }: SettingsTabProps) {
   const [formData, setFormData] = useState(initialSettings || {});
   const [isPending, startTransition] = useTransition();
   const [actionMsg, setActionMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleChange = (key: string, value: string) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev: Record<string, string>) => ({ ...prev, [key]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,6 +40,40 @@ export function SettingsTab({ initialSettings }: SettingsTabProps) {
   };
 
   const getVal = (key: string) => formData[key] || "";
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    setActionMsg(null);
+
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("files", files[0]);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      if (!res.ok) {
+        throw new Error("Lỗi tải ảnh lên. Vui lòng thử lại.");
+      }
+
+      const data = await res.json();
+      if (data.urls && Array.isArray(data.urls) && data.urls.length > 0) {
+        handleChange("SITE_LOGO_URL", data.urls[0]);
+        setActionMsg({ type: "success", text: "Tải ảnh lên thành công" });
+        setTimeout(() => setActionMsg(null), 3000);
+      }
+    } catch (error: any) {
+      setActionMsg({ type: "error", text: error.message || "Không thể tải ảnh" });
+    } finally {
+      setIsUploading(false);
+      e.target.value = "";
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-5xl mx-auto pb-10">
@@ -86,10 +121,45 @@ export function SettingsTab({ initialSettings }: SettingsTabProps) {
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Logo URL (Header)</label>
-              <input type="text" value={getVal("SITE_LOGO_URL")} onChange={e => handleChange("SITE_LOGO_URL", e.target.value)}
-                placeholder="/images/logo.png hoặc https://..."
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
-              <p className="text-[10px] text-gray-400 mt-1.5">Nên dùng file SVG hoặc PNG trong suốt.</p>
+              
+              <div className="flex flex-col gap-3">
+                {getVal("SITE_LOGO_URL") ? (
+                  <div className="relative w-40 h-20 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center p-2 group overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={getVal("SITE_LOGO_URL")} alt="Logo" className="max-w-full max-h-full object-contain" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                      <button
+                        type="button"
+                        onClick={() => handleChange("SITE_LOGO_URL", "")}
+                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className={`flex flex-col items-center justify-center gap-3 w-full h-32 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-50 hover:border-primary/50 text-gray-400 hover:text-primary transition-all cursor-pointer ${isUploading ? "opacity-50 pointer-events-none" : ""}`}>
+                    <div className="p-3 bg-white rounded-full shadow-sm">
+                      {isUploading ? <Loader2 className="size-5 animate-spin" /> : <UploadCloud className="size-5" />}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium">{isUploading ? "Đang xử lý..." : "Click để tải ảnh lên"}</p>
+                      <p className="text-xs text-gray-400 mt-1">Nên dùng file PNG, SVG nền trong suốt (Tỉ lệ ngang, ~200x50px)</p>
+                    </div>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/png, image/jpeg, image/svg+xml, image/webp" 
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                    />
+                  </label>
+                )}
+                
+                <input type="text" value={getVal("SITE_LOGO_URL")} onChange={e => handleChange("SITE_LOGO_URL", e.target.value)}
+                  placeholder="Hoặc dán URL ảnh trực tiếp vào đây..."
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2 text-xs text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-gray-300" />
+              </div>
             </div>
           </div>
         </div>
