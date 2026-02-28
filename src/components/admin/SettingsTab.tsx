@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { CheckCircle2, AlertCircle, Loader2, Save, Globe, Phone, Share2, Search as SearchIcon, UploadCloud, X, AlertTriangle } from "lucide-react";
-import { updateSettings } from "@/app/actions/setting";
+import { updateSettings, verifyCurrentPassword } from "@/app/actions/setting";
 
 interface SettingsTabProps {
   initialSettings: Record<string, string>;
@@ -14,29 +14,62 @@ export function SettingsTab({ initialSettings }: SettingsTabProps) {
   const [actionMsg, setActionMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Password confirmation state
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+
   const handleChange = (key: string, value: string) => {
     setFormData((prev: Record<string, string>) => ({ ...prev, [key]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    startTransition(async () => {
-      // Define categories for each key if they are new
-      const categories: Record<string, string> = {
-        SITE_NAME: 'GENERAL', SITE_SLOGAN: 'GENERAL', SITE_LOGO_URL: 'GENERAL',
-        CONTACT_HOTLINE: 'CONTACT', CONTACT_EMAIL: 'CONTACT', CONTACT_ADDRESS: 'CONTACT', CONTACT_MAP_IFRAME: 'CONTACT',
-        SOCIAL_FACEBOOK: 'SOCIAL', SOCIAL_ZALO: 'SOCIAL', SOCIAL_YOUTUBE: 'SOCIAL',
-        SEO_META_TITLE: 'SEO', SEO_META_DESCRIPTION: 'SEO', TRACKING_GOOGLE_ANALYTICS: 'SEO'
-      };
-      
-      const result = await updateSettings(formData, categories);
-      if (result.success) {
-        setActionMsg({ type: "success", text: "Đã lưu cài đặt thành công" });
-      } else {
-        setActionMsg({ type: "error", text: result.error || "Có lỗi xảy ra" });
+    setShowPasswordDialog(true);
+  };
+
+  const handleConfirmSave = async () => {
+    if (!confirmPassword.trim()) {
+      setVerifyError("Vui lòng nhập mật khẩu");
+      return;
+    }
+    
+    setIsVerifying(true);
+    setVerifyError(null);
+    
+    try {
+      const verifyResult = await verifyCurrentPassword(confirmPassword);
+      if (!verifyResult.success) {
+        setVerifyError(verifyResult.error || "Mật khẩu không chính xác");
+        setIsVerifying(false);
+        return;
       }
-      setTimeout(() => setActionMsg(null), 3000);
-    });
+      
+      // If password is correct, proceed to save settings
+      setShowPasswordDialog(false);
+      setConfirmPassword("");
+      
+      startTransition(async () => {
+        const categories: Record<string, string> = {
+          SITE_NAME: 'GENERAL', SITE_SLOGAN: 'GENERAL', SITE_LOGO_URL: 'GENERAL',
+          CONTACT_HOTLINE: 'CONTACT', CONTACT_EMAIL: 'CONTACT', CONTACT_ADDRESS: 'CONTACT', CONTACT_MAP_IFRAME: 'CONTACT',
+          SOCIAL_FACEBOOK: 'SOCIAL', SOCIAL_ZALO: 'SOCIAL', SOCIAL_YOUTUBE: 'SOCIAL',
+          SEO_META_TITLE: 'SEO', SEO_META_DESCRIPTION: 'SEO', TRACKING_GOOGLE_ANALYTICS: 'SEO'
+        };
+        
+        const result = await updateSettings(formData, categories);
+        if (result.success) {
+          setActionMsg({ type: "success", text: "Đã lưu cài đặt thành công" });
+        } else {
+          setActionMsg({ type: "error", text: result.error || "Có lỗi xảy ra" });
+        }
+        setTimeout(() => setActionMsg(null), 3000);
+      });
+    } catch (error) {
+      setVerifyError("Có lỗi xảy ra, vui lòng thử lại sau");
+      setIsVerifying(false);
+    }
   };
 
   const getVal = (key: string) => formData[key] || "";
@@ -111,6 +144,56 @@ export function SettingsTab({ initialSettings }: SettingsTabProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      {/* Password Confirmation Dialog */}
+      {showPasswordDialog && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Xác nhận mật khẩu</h3>
+            <p className="text-sm text-gray-500 mb-5">
+              Vui lòng nhập mật khẩu quản trị viên của bạn để lưu các thay đổi quan trọng này.
+            </p>
+            
+            <div className="mb-4">
+              <input 
+                type="password" 
+                value={confirmPassword}
+                onChange={(e) => { setConfirmPassword(e.target.value); setVerifyError(null); }}
+                placeholder="Nhập mật khẩu..."
+                className={`w-full rounded-xl border px-4 py-3 text-sm text-gray-900 focus:ring-1 outline-none transition-all ${verifyError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'}`}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleConfirmSave();
+                  }
+                }}
+              />
+              {verifyError && <p className="text-red-500 text-xs mt-2 font-medium flex items-center gap-1"><AlertCircle className="size-3" /> {verifyError}</p>}
+            </div>
+            
+            <div className="flex gap-3 justify-end mt-6">
+              <button 
+                type="button" 
+                onClick={() => { setShowPasswordDialog(false); setConfirmPassword(""); setVerifyError(null); }}
+                className="px-4 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition-colors"
+                disabled={isVerifying || isPending}
+              >
+                Hủy
+              </button>
+              <button 
+                type="button" 
+                onClick={handleConfirmSave}
+                disabled={isVerifying || !confirmPassword.trim() || isPending}
+                className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all min-w-[120px]"
+              >
+                {isVerifying || isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         {/* Thông tin chung */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">

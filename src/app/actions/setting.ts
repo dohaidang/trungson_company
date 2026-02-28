@@ -3,6 +3,7 @@
 import prisma from '@/lib/db';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import bcrypt from 'bcryptjs';
 
 // Verify admin role 
 async function verifyAdmin() {
@@ -14,6 +15,32 @@ async function verifyAdmin() {
         return { userId: null, error: 'Bạn không có quyền truy cập' };
     }
     return { userId: session.user.id, error: null };
+}
+
+// Xác minh mật khẩu admin đang đăng nhập
+export async function verifyCurrentPassword(password: string) {
+    try {
+        const { userId, error } = await verifyAdmin();
+        if (error || !userId) return { success: false, error: error || 'Không tìm thấy thông tin đăng nhập' };
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (!user || !user.password) {
+            return { success: false, error: 'Tài khoản không hợp lệ hoặc chưa thiết lập mật khẩu' };
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return { success: false, error: 'Mật khẩu không chính xác' };
+        }
+
+        return { success: true, error: null };
+    } catch (error) {
+        console.error('verifyCurrentPassword error:', error);
+        return { success: false, error: 'Đã xảy ra lỗi hệ thống khi kiểm tra mật khẩu' };
+    }
 }
 
 // Lấy danh sách setting list để trả về cho Client Component hoặc Client UI
