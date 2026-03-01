@@ -46,6 +46,20 @@ const PROJECTS = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCNzCte1D6X418EWPtmaLJg_3pK04ZFtlWqMwsbDI39UJs7ld5q4afKfOL_BSeAud_2CmAufamEyFqfwjrHUZgRWG_1wHBHp-Wj4wMzvsrP9RgXjkOd7drc_LWfFMDhVHSGL1bjd5RljR7_ZUciXE0rHATLlah1NRcnMHRgXXv21CDh9gDHhREhvTZlxZl61ex9erxsU_fDuL23TLu_L2Nji_ZqQ5IIk3PYKkLWI7-7lRv9V3TSKvv50yZ3Bj9--X7EQ9M6ijVNkSk",
   },
+  {
+    title: "Trường Quốc Tế Gateway",
+    location: "Cầu Giấy, Hà Nội",
+    category: "Giáo dục",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBAkL0V5N6n_Yt7Q0ZXVqR9aR_7z1Qx5ZxF28CkxLZwG2p89x2-T0f9d9s8A0YmE02wJ3k5P2l7oW084VfR9_rYg3DzvbO06YVn9HwX_02ZqE5F5d7o5eH9rN4qZ8P8Dq5V4M5O5_aZ3sD_7o7wX86LfZ9_f8R9P2Ym3Z6r",
+  },
+  {
+    title: "Trung Tâm Thương Mại AEON",
+    location: "Bình Dương",
+    category: "Thương mại",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDFXWc9O3Q4Z5zR-O6wK82ZxF12C_m9Z9Q0X4yR9z2T8wY1o5Z8P_0MvZ5E7-H4_e8s2V4J9w8-Q9P3o0-V0Y2oT8sX8M1_R5z0C7l6L9",
+  },
 ];
 
 export function FeaturedProjects() {
@@ -87,9 +101,9 @@ export function FeaturedProjects() {
           <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 sm:w-24 bg-gradient-to-l from-background to-transparent" />
 
           {/* Scrolling track */}
-          <div className="flex animate-marquee hover:[animation-play-state:paused] gap-6 w-max">
+          <div className="flex animate-marquee hover:[animation-play-state:paused] w-max">
             {[...PROJECTS, ...PROJECTS].map((project, i) => (
-              <div key={`${project.title}-${i}`} className="shrink-0 w-[300px] sm:w-[400px]">
+              <div key={`${project.title}-${i}`} className="shrink-0 w-[300px] sm:w-[400px] pr-6">
                 <ProjectCard {...project} />
               </div>
             ))}
