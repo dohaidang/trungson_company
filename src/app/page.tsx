@@ -51,7 +51,7 @@ export default function Home() {
                   <span>Xem Báo Giá</span>
                   <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
                 </Link>
-                <Link href="#contact" className="flex h-12 min-w-[160px] items-center justify-center gap-2 rounded border-2 border-white/30 bg-white/10 px-8 text-base font-bold text-white backdrop-blur-sm transition-all hover:bg-white hover:text-black">
+                <Link href="/contact" className="flex h-12 min-w-[160px] items-center justify-center gap-2 rounded border-2 border-white/30 bg-white/10 px-8 text-base font-bold text-white backdrop-blur-sm transition-all hover:bg-white hover:text-black">
                   <span>Liên Hệ Ngay</span>
                 </Link>
               </div>
