@@ -80,13 +80,20 @@ export function FeaturedProjects() {
           </Link>
         </div>
 
-        {/* Projects - Horizontal scroll */}
-        <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin" style={{ scrollbarColor: 'hsl(4 58% 44% / 0.3) transparent' }}>
-          {PROJECTS.map((project) => (
-            <div key={project.title} className="snap-start shrink-0 w-[340px] sm:w-[400px]">
-              <ProjectCard {...project} />
-            </div>
-          ))}
+        {/* Projects - Marquee scroll */}
+        <div className="relative overflow-hidden w-full py-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          {/* Fade edges */}
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 sm:w-24 bg-gradient-to-r from-background to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 sm:w-24 bg-gradient-to-l from-background to-transparent" />
+
+          {/* Scrolling track */}
+          <div className="flex animate-marquee hover:[animation-play-state:paused] gap-6 w-max">
+            {[...PROJECTS, ...PROJECTS].map((project, i) => (
+              <div key={`${project.title}-${i}`} className="shrink-0 w-[300px] sm:w-[400px]">
+                <ProjectCard {...project} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
