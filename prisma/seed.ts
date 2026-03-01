@@ -1,4 +1,4 @@
-import { PrismaClient, Role, ProductType, OrderStatus, DeliveryMethod } from '@prisma/client';
+import { PrismaClient, Role, OrderStatus, DeliveryMethod } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -67,13 +67,40 @@ async function main() {
     });
     console.log('✅ 3 customer/contractor users created');
 
+    // ===== 2.5 CATEGORIES & APPLICATIONS =====
+    const categoriesData = [
+        { name: 'Gạch Chỉ (Solid)', slug: 'gach-chi', description: 'Gạch đặc và tuynel truyền thống' },
+        { name: 'Gạch Lỗ (Hollow)', slug: 'gach-lo', description: 'Gạch nhiều lỗ cách âm, cách nhiệt' },
+        { name: 'Gạch Block', slug: 'gach-block', description: 'Gạch bê tông xi măng khối lớn' },
+        { name: 'Gạch Trang Trí', slug: 'gach-trang-tri', description: 'Gạch ốp tường, vỉa hè, sân vườn' },
+    ];
+
+    console.log('Inserting Categories...');
+    await prisma.category.createMany({ data: categoriesData });
+    const categories = await prisma.category.findMany();
+
+    const appsData = [
+        { name: 'Xây thô', slug: 'xay-tho', description: 'Xây móng, tường bao chịu lực' },
+        { name: 'Vách ngăn', slug: 'vach-ngan', description: 'Tường ngăn phòng bên trong' },
+        { name: 'Ốp lát ngoài trời', slug: 'op-lat-ngoai-troi', description: 'Trang trí mặt tiền, hàng rào' },
+        { name: 'Lát hè & sân', slug: 'lat-he-san', description: 'Khu vực chịu tải trọng đi lại' },
+    ];
+
+    console.log('Inserting Applications...');
+    await prisma.application.createMany({ data: appsData });
+    const applications = await prisma.application.findMany();
+
+    console.log('✅ Categories and Applications created');
+
     // ===== 3. PRODUCTS =====
     const productsData = [
         {
             name: 'Gạch Đặc Tiêu Chuẩn - Tuynel Đỏ',
             slug: 'gach-dac-tieu-chuan-tuynel-do',
             description: 'Gạch đỏ đặc truyền thống thích hợp cho tường chịu lực. Sản xuất theo công nghệ Tuynel, đạt tiêu chuẩn TCVN.',
-            type: ProductType.SOLID,
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-chi')?.id,
+            applicationSlugs: ['xay-tho'],
             dimensions: '22x10.5x6cm',
             weight: 1.8,
             compressiveStrength: 7.5,
@@ -87,7 +114,9 @@ async function main() {
             name: 'Gạch 2 Lỗ - Tiêu Chuẩn',
             slug: 'gach-2-lo-tieu-chuan',
             description: 'Lựa chọn kinh tế cho tường ngăn. Khả năng cách nhiệt, cách âm tốt.',
-            type: ProductType.TWO_HOLE,
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-lo')?.id,
+            applicationSlugs: ['vach-ngan'],
             dimensions: '22x10.5x6cm',
             weight: 1.5,
             compressiveStrength: 5.0,
@@ -101,7 +130,9 @@ async function main() {
             name: 'Gạch Ốp Tường Xám Đá',
             slug: 'gach-op-tuong-xam-da',
             description: 'Bề mặt xám hiện đại cho thiết kế kiến trúc đương đại. Chống thấm, chống nấm mốc.',
-            type: ProductType.DECORATIVE,
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-trang-tri')?.id,
+            applicationSlugs: ['op-lat-ngoai-troi'],
             dimensions: '20x10x5cm',
             weight: 1.2,
             compressiveStrength: 10.0,
@@ -115,7 +146,9 @@ async function main() {
             name: 'Gạch Ốp Cổ Điển',
             slug: 'gach-op-co-dien',
             description: 'Mang lại vẻ đẹp cổ điển và ấm cúng với bề mặt giả gỗ tự nhiên.',
-            type: ProductType.DECORATIVE,
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-trang-tri')?.id,
+            applicationSlugs: ['op-lat-ngoai-troi'],
             dimensions: '20x10x5cm',
             weight: 1.1,
             compressiveStrength: 10.0,
@@ -129,7 +162,9 @@ async function main() {
             name: 'Gạch Block 4 Lỗ',
             slug: 'gach-block-4-lo',
             description: 'Block bê tông 4 lỗ cách nhiệt, cách âm xuất sắc. Thi công nhanh, tiết kiệm vữa.',
-            type: ProductType.BLOCK,
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-block')?.id,
+            applicationSlugs: ['xay-tho', 'vach-ngan'],
             dimensions: '39x19x14cm',
             weight: 8.5,
             compressiveStrength: 5.0,
@@ -143,7 +178,9 @@ async function main() {
             name: 'Gạch Vỉa Hè',
             slug: 'gach-via-he',
             description: 'Gạch lát vỉa hè con sâu chống trơn trượt, thoát nước tốt. Bền màu theo thời gian.',
-            type: ProductType.DECORATIVE,
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-trang-tri')?.id,
+            applicationSlugs: ['lat-he-san'],
             dimensions: '20x10x6cm',
             weight: 2.0,
             compressiveStrength: 15.0,
@@ -156,12 +193,18 @@ async function main() {
     ];
 
     for (const productData of productsData) {
-        const { priceTiers, ...product } = productData;
+        const { priceTiers, type, applicationSlugs, ...product } = productData;
+
         await prisma.product.upsert({
             where: { slug: product.slug },
             update: {},
             create: {
                 ...product,
+                applications: {
+                    connect: applications
+                        .filter(a => (applicationSlugs as string[]).includes(a.slug))
+                        .map(a => ({ id: a.id }))
+                },
                 priceTiers: {
                     create: priceTiers,
                 },
