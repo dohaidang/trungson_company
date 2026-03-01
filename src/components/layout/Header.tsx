@@ -27,17 +27,22 @@ export function Header({ settings }: { settings?: Record<string, string> }) {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm support-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded bg-primary text-primary-foreground">
-              <Home className="size-5" />
-            </div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
-              {settings?.SITE_NAME || "Công ty CP TM & SX VLXD Trung Sơn"}
-            </h1>
-          </Link>
+          <div className="flex flex-1">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="flex size-8 items-center justify-center rounded bg-primary text-primary-foreground">
+                <Home className="size-5" />
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground hidden sm:block">
+                {settings?.SITE_NAME || "Công ty CP TM & SX VLXD Trung Sơn"}
+              </h1>
+              <h1 className="text-xl font-bold tracking-tight text-foreground sm:hidden">
+                Trung Sơn
+              </h1>
+            </Link>
+          </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex flex-none items-center justify-center gap-8">
             <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">Trang Chủ</Link>
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">Giới Thiệu</Link>
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Sản Phẩm</Link>
@@ -46,7 +51,7 @@ export function Header({ settings }: { settings?: Record<string, string> }) {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-1 items-center justify-end gap-3">
             {/* Search */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
