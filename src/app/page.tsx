@@ -137,7 +137,7 @@ export default function Home() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {/* Product 1 */}
               <div className="group flex flex-col overflow-hidden rounded bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                <Link href="/products/tuynel-a1" className="relative aspect-square w-full overflow-hidden bg-muted group/image cursor-pointer">
                   <Image 
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbiI0Vk0OhSQce25JTEf_EjY710XrkWZy6PMYIvWN62ZrShUkgZ96FQWEYWlb4ZMue9Fjmqxg2nn8kByBO5R3aan3e9QH5ZTuKWg3Tymq8cfas0Xm74sd7Talbc-ExBIKgP12rWbEqZqO542TOv05KjnC31V_v4DvAEOOuVvogV0gbBc8r-4UeH588SVb9gpXL9rlwqnNVFzqlfjUIiR4MyK76SWMbJNHqJDYkGinOLGLt_I8ZGoZMgCG3WVyLgMRv4lKlnRFtO-s"
                     alt="Gạch Tuynel A1"
@@ -145,10 +145,12 @@ export default function Home() {
                     className="object-cover transition-transform group-hover:scale-110"
                   />
                   <div className="absolute right-2 top-2 rounded bg-primary px-2 py-1 text-xs font-bold text-primary-foreground">-10%</div>
-                </div>
+                </Link>
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <div>
-                    <h3 className="text-lg font-bold text-foreground">Gạch Tuynel A1</h3>
+                    <Link href="/products/tuynel-a1" className="hover:text-primary transition-colors">
+                      <h3 className="text-lg font-bold text-foreground hover:text-primary">Gạch Tuynel A1</h3>
+                    </Link>
                     <p className="text-xs text-muted-foreground">Chuẩn 2 lỗ</p>
                   </div>
                   <div className="flex items-center justify-between">
@@ -166,17 +168,19 @@ export default function Home() {
 
                {/* Product 2 */}
               <div className="group flex flex-col overflow-hidden rounded bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                <Link href="/products/block-4-lo" className="relative aspect-square w-full overflow-hidden bg-muted cursor-pointer">
                   <Image 
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjfM0F4abx79MX-E0PurYgsoe4p49tstEiq29Usa6tg7IGstCihzEnaq5nlgne08t3IhC75EyGPqKotafX7r0p85DlP7PxiqdoSbLLyNj1uyW12TTYmhQQ2SBDRNYiFaNJ_PLFFnqU9tOjBKujv1oZJ8sStH7DdZ811NH7YcVBx67jW8Gd_5Zt4PMQjf30C_Y2bV33Z3EUYvcT3xZ4AGn10o78XQNtKbTkSOh-BXfC-4hH5rx1fzYLLxlXPx32_FiGX9g4T3DbkYo"
                     alt="Gạch Block Đặc"
                     fill
                     className="object-cover transition-transform group-hover:scale-110"
                   />
-                </div>
+                </Link>
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <div>
-                    <h3 className="text-lg font-bold text-foreground">Gạch Block 4 Lỗ</h3>
+                    <Link href="/products/block-4-lo" className="hover:text-primary transition-colors">
+                      <h3 className="text-lg font-bold text-foreground hover:text-primary">Gạch Block 4 Lỗ</h3>
+                    </Link>
                     <p className="text-xs text-muted-foreground">Bê tông cốt liệu</p>
                   </div>
                   <div className="flex items-center justify-between">
@@ -194,7 +198,7 @@ export default function Home() {
 
               {/* Product 3 */}
               <div className="group flex flex-col overflow-hidden rounded bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                <Link href="/products/do-dac" className="relative aspect-square w-full overflow-hidden bg-muted cursor-pointer">
                    <Image 
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcQ8-fJ2XCj0mHeVcFulFk8_JscrIt0RT8wxX-B2CRkgk94Eu834WC4ZkSpJ5NXUvLHwQ1OsgM05sIh73J8P-IDEzpiYdMmR7uv8cmWk6_u0CGCur05kQVpbp24-yxNXQS1wz-MID7q8CpERA85ByZEN0gPz4dNbHJSL-4vjO6w-k_3p7m0-Ak3Bs_eFNiAkKm8NOk-JGanngrEfHUzfZEmRW51jfhCP6bxfVTC3_Fwmau3KGhWy6XsjgfIG2WF2DiX5ekGuhYMTQ"
                     alt="Gạch Đỏ Đặc"
@@ -202,10 +206,12 @@ export default function Home() {
                     className="object-cover transition-transform group-hover:scale-110"
                   />
                   <div className="absolute left-2 top-2 rounded bg-black/60 px-2 py-1 text-xs font-bold text-white backdrop-blur-sm">Bán Chạy</div>
-                </div>
+                </Link>
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <div>
-                    <h3 className="text-lg font-bold text-foreground">Gạch Đỏ Đặc</h3>
+                    <Link href="/products/do-dac" className="hover:text-primary transition-colors">
+                      <h3 className="text-lg font-bold text-foreground hover:text-primary">Gạch Đỏ Đặc</h3>
+                    </Link>
                     <p className="text-xs text-muted-foreground">Truyền thống</p>
                   </div>
                   <div className="flex items-center justify-between">
@@ -223,17 +229,19 @@ export default function Home() {
 
               {/* Product 4 */}
               <div className="group flex flex-col overflow-hidden rounded bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                <Link href="/products/con-sau" className="relative aspect-square w-full overflow-hidden bg-muted cursor-pointer">
                    <Image 
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNzCte1D6X418EWPtmaLJg_3pK04ZFtlWqMwsbDI39UJs7ld5q4afKfOL_BSeAud_2CmAufamEyFqfwjrHUZgRWG_1wHBHp-Wj4wMzvsrP9RgXjkOd7drc_LWfFMDhVHSGL1bjd5RljR7_ZUciXE0rHATLlah1NRcnMHRgXXv21CDh9gDHhREhvTZlxZl61ex9erxsU_fDuL23TLu_L2Nji_ZqQ5IIk3PYKkLWI7-7lRv9V3TSKvv50yZ3Bj9--X7EQ9M6ijVNkSk"
                     alt="Gạch Vỉa Hè"
                     fill
                     className="object-cover transition-transform group-hover:scale-110"
                   />
-                </div>
+                </Link>
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <div>
-                    <h3 className="text-lg font-bold text-foreground">Gạch Con Sâu</h3>
+                    <Link href="/products/con-sau" className="hover:text-primary transition-colors">
+                      <h3 className="text-lg font-bold text-foreground hover:text-primary">Gạch Con Sâu</h3>
+                    </Link>
                     <p className="text-xs text-muted-foreground">Lát sân vườn vỉa hè</p>
                   </div>
                   <div className="flex items-center justify-between">
