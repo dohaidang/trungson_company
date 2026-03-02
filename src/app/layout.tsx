@@ -7,6 +7,7 @@ import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { CartProvider } from "@/lib/CartContext";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { getSettings } from "@/app/actions/setting";
+import NextTopLoader from 'nextjs-toploader';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
       >
+        <NextTopLoader color="hsl(var(--primary))" showSpinner={false} height={3} shadow="0 0 10px hsl(var(--primary)),0 0 5px hsl(var(--primary))" />
         <SessionProvider>
           <CartProvider>
             <div className="relative flex min-h-screen flex-col w-full overflow-x-hidden">
