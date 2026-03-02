@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { CartProvider } from "@/lib/CartContext";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 import { getSettings } from "@/app/actions/setting";
 
 const geistSans = Geist({
@@ -34,14 +35,16 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
       >
-        <CartProvider>
-          <div className="relative flex min-h-screen flex-col w-full overflow-x-hidden">
-            <Header settings={settings} />
-            <main className="flex-1 w-full">{children}</main>
-            <Footer settings={settings} />
-            <ScrollToTop />
-          </div>
-        </CartProvider>
+        <SessionProvider>
+          <CartProvider>
+            <div className="relative flex min-h-screen flex-col w-full overflow-x-hidden">
+              <Header settings={settings} />
+              <main className="flex-1 w-full">{children}</main>
+              <Footer settings={settings} />
+              <ScrollToTop />
+            </div>
+          </CartProvider>
+        </SessionProvider>
       </body>
     </html>
   );

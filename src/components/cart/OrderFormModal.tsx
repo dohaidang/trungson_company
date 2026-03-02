@@ -1,7 +1,10 @@
 "use client";
 
-import { X, Send } from "lucide-react";
+import { X, Send, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useCart } from "@/lib/CartContext";
+import { useRouter } from "next/navigation";
 
 interface OrderFormModalProps {
   isOpen: boolean;
@@ -9,9 +12,19 @@ interface OrderFormModalProps {
 }
 
 export function OrderFormModal({ isOpen, onClose }: OrderFormModalProps) {
-  const [issubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const { items, clearCart } = useCart();
+  const router = useRouter();
 
-  // Prevent scrolling when modal is open
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (isOpen && !session) {
+      router.push("/login?callbackUrl=/cart");
+    }
+  }, [isOpen, session, router]);
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -23,14 +36,50 @@ export function OrderFormModal({ isOpen, onClose }: OrderFormModalProps) {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !session) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitted(true);
-    }, 1000);
+    setIsLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const customerName = formData.get("customerName") as string;
+    const customerPhone = formData.get("customerPhone") as string;
+    const deliveryAddress = formData.get("deliveryAddress") as string;
+    const notes = formData.get("notes") as string;
+
+    try {
+        const res = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                items: items.map(item => ({ productId: item.id, quantity: item.quantity })),
+                customerName,
+                customerPhone,
+                deliveryAddress,
+                notes,
+                deliveryMethod: "CRANE"
+            }),
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || "Gửi đơn hàng thất bại");
+
+        setIsSubmitted(true);
+        clearCart();
+    } catch (err: any) {
+        setError(err.message);
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setIsSubmitted(false);
+    setError(null);
+    onClose();
   };
 
   return (
@@ -39,13 +88,13 @@ export function OrderFormModal({ isOpen, onClose }: OrderFormModalProps) {
         
         {/* Close Button */}
         <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute right-4 top-4 text-muted-foreground hover:text-foreground transition-colors"
         >
             <X className="size-5" />
         </button>
 
-        {!issubmitted ? (
+        {!isSubmitted ? (
             <div className="p-6 sm:p-8">
                 <div className="mb-6">
                     <h3 className="text-xl font-black uppercase tracking-tight text-foreground">
@@ -60,27 +109,31 @@ export function OrderFormModal({ isOpen, onClose }: OrderFormModalProps) {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Họ Tên <span className="text-red-500">*</span></label>
-                            <input required type="text" className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Nguyễn Văn A" />
+                            <input name="customerName" required type="text" className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Nguyễn Văn A" defaultValue={session.user?.name || ""} />
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Số Điện Thoại <span className="text-red-500">*</span></label>
-                            <input required type="tel" className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="0912..." />
+                            <input name="customerPhone" required type="tel" className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="0912..." />
                         </div>
                     </div>
                     
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Địa Chỉ Giao Hàng</label>
-                        <input required type="text" className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Số nhà, đường, phường/xã..." />
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Địa Chỉ Giao Hàng <span className="text-red-500">*</span></label>
+                        <input name="deliveryAddress" required type="text" className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Số nhà, đường, phường/xã..." />
                     </div>
 
                     <div className="space-y-2">
                         <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ghi Chú</label>
-                        <textarea className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none min-h-[80px]" placeholder="Ghi chú về thời gian giao hàng hoặc yêu cầu đặc biệt..." />
+                        <textarea name="notes" className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none min-h-[80px]" placeholder="Ghi chú về thời gian giao hàng hoặc yêu cầu đặc biệt..." />
                     </div>
 
-                    <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-widest py-3 rounded-sm transition-all mt-2 flex items-center justify-center gap-2">
-                        <Send className="size-4" />
-                        Gửi Đơn Hàng
+                    {error && (
+                        <p className="text-sm text-red-500 font-medium text-center">{error}</p>
+                    )}
+
+                    <button disabled={isLoading} type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-widest py-3 rounded-sm transition-all mt-2 flex items-center justify-center gap-2 disabled:opacity-50">
+                        {isLoading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                        {isLoading ? "Đang Gửi..." : "Gửi Đơn Hàng"}
                     </button>
                     
                     <p className="text-[10px] text-center text-muted-foreground/60">
@@ -100,7 +153,7 @@ export function OrderFormModal({ isOpen, onClose }: OrderFormModalProps) {
                     Cảm ơn bạn đã quan tâm. Nhân viên kinh doanh của Trung Sơn sẽ liên hệ với bạn qua số điện thoại vừa cung cấp trong thời gian sớm nhất.
                 </p>
                 <button 
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="bg-muted hover:bg-muted/80 text-foreground font-bold uppercase tracking-wide px-6 py-2 rounded-sm transition-colors"
                 >
                     Đóng

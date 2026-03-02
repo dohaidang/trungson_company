@@ -4,10 +4,22 @@ import { ShieldCheck, Truck, Lock, FileText } from "lucide-react";
 import { useState } from "react";
 import { OrderFormModal } from "./OrderFormModal";
 import { useCart } from "@/lib/CartContext";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export function CartSummary() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { totalPrice, totalItems } = useCart();
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleCheckoutClick = () => {
+    if (!session) {
+      router.push("/login?callbackUrl=/cart");
+    } else {
+      setIsModalOpen(true);
+    }
+  };
 
   const shipping = totalPrice > 0 ? 450000 : 0;
   const vat = Math.round(totalPrice * 0.1);
@@ -44,7 +56,7 @@ export function CartSummary() {
 
         <div className="mt-8 flex flex-col gap-3">
             <button 
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleCheckoutClick}
                 disabled={totalItems === 0}
                 className="group flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-4 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -52,7 +64,7 @@ export function CartSummary() {
                 Gửi Đơn Hàng
             </button>
             <button 
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleCheckoutClick}
                 disabled={totalItems === 0}
                 className="group flex w-full items-center justify-center gap-2 rounded-sm border border-primary bg-transparent py-4 text-sm font-bold uppercase tracking-widest text-primary transition-all hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
             >

@@ -129,6 +129,9 @@ model Order {
   deliveryMethod   DeliveryMethod @default(CRANE)
   roadWidthLimit   Float? // mét
   deliveryAddress  String
+  customerName     String?        // Bổ sung: Tên người nhận
+  customerPhone    String?        // Bổ sung: Số điện thoại
+  notes            String?        // Bổ sung: Ghi chú
   deliveryLat      Float?
   deliveryLng      Float?
   totalAmount      Float

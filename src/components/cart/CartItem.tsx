@@ -2,6 +2,7 @@
 
 import { Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useCart, type CartItem as CartItemType } from "@/lib/CartContext";
 
 interface CartItemProps {
@@ -10,6 +11,21 @@ interface CartItemProps {
 
 export function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart();
+  const [inputValue, setInputValue] = useState(item.quantity.toString());
+
+  // Sync local state if context quantity changes externally
+  useEffect(() => {
+    setInputValue(item.quantity.toString());
+  }, [item.quantity]);
+
+  const handleBlur = () => {
+    let val = parseInt(inputValue);
+    if (isNaN(val) || val <= 0) {
+      val = 1; // Default back to 1 if invalid
+      setInputValue("1");
+    }
+    updateQuantity(item.id, val);
+  };
 
   return (
     <tr className="group border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
@@ -44,10 +60,15 @@ export function CartItem({ item }: CartItemProps) {
           </button>
           <input
             type="number"
-            value={item.quantity}
+            value={inputValue}
             onChange={(e) => {
-              const val = parseInt(e.target.value);
-              if (!isNaN(val) && val > 0) updateQuantity(item.id, val);
+              setInputValue(e.target.value);
+            }}
+            onBlur={handleBlur}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.currentTarget.blur();
+              }
             }}
             className="w-12 text-center text-sm font-bold text-foreground bg-transparent outline-none"
           />
