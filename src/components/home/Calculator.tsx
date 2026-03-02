@@ -228,9 +228,17 @@ export function Calculator() {
               )}
             </div>
             
-            <p className="text-[10px] text-muted-foreground text-center italic">
-              * Lưu ý: Kết quả tính toán đã bao gồm hao hụt và mạch vữa tiêu chuẩn (10-15mm). Tuỳ vào điều kiện thi công thực tế mà số lượng có thể thay đổi. Đặc biệt đối với gạch xây tường, dữ liệu đang áp dụng cho tường có độ dày 110mm (tường đơn).
-            </p>
+            <div className="mt-4 flex flex-col gap-2 rounded-md bg-amber-500/10 p-4 border border-amber-500/20 text-xs text-amber-600/90 dark:text-amber-500/90">
+              <p className="font-bold uppercase tracking-wide">
+                * Lưu ý quan trọng:
+              </p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Kết quả tính toán trên <strong>chỉ mang tính chất tham khảo</strong> để ước tính sơ bộ ngân sách.</li>
+                <li>Số lượng đã được tính bao gồm hao hụt và mạch vữa tiêu chuẩn (10-15mm).</li>
+                <li>Dữ liệu tính toán gạch xây tường đang được áp dụng cho quy chuẩn tường đơn (dày 110mm).</li>
+                <li>Tùy vào điều kiện thi công thực tế, tay nghề thợ, và thiết kế bản vẽ mà khối lượng và chi phí thực tế có thể thay đổi. Vui lòng liên hệ trực tiếp với chúng tôi để được tư vấn chính xác nhất.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
