@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         }
 
         const uploadedUrls: string[] = [];
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "products");
+        const { uploadFileBuffer, getFilePresignedUrl } = await import("@/lib/minio");
 
         // 3. Process each file
         for (const file of files) {
@@ -40,13 +40,14 @@ export async function POST(request: NextRequest) {
             const cleanName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
             const filename = `${cleanName}-${uniqueSuffix}${ext}`;
 
-            const filepath = path.join(uploadDir, filename);
+            // Upload via MinIO
+            await uploadFileBuffer(buffer, filename, file.type);
 
-            // Save to public/uploads/products
-            await writeFile(filepath, buffer);
+            // Get Presigned URL valid for 1 hour to return to client
+            const presignedUrl = await getFilePresignedUrl(filename);
 
             // Add public URL to result array
-            uploadedUrls.push(`/uploads/products/${filename}`);
+            uploadedUrls.push(presignedUrl);
         }
 
         return NextResponse.json({ urls: uploadedUrls });
