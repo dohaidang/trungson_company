@@ -3,15 +3,26 @@ import { getUserForEdit } from "@/app/actions/admin";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Chỉnh Sửa Người Dùng | Admin",
-};
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const { user } = await getUserForEdit(id);
+  
+  if (!user) {
+    return { title: "Không tìm thấy người dùng | Admin" };
+  }
+  
+  return { title: `Chỉnh sửa: ${user.name || user.email} | Admin` };
+}
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { user, error } = await getUserForEdit(id);
 
-  if (error || !user) {
+  if (error) {
+    throw new Error(error);
+  }
+
+  if (!user) {
     notFound();
   }
 

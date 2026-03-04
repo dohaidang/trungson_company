@@ -8,6 +8,7 @@ import { CartProvider } from "@/lib/CartContext";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { getSettings } from "@/app/actions/setting";
 import NextTopLoader from 'nextjs-toploader';
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default async function RootLayout({
             </div>
           </CartProvider>
         </SessionProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

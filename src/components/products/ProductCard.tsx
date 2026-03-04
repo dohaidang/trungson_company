@@ -103,6 +103,7 @@ export function ProductCard({
                 {price.toLocaleString()}₫
                 </span>
             </div>
+            <span className="text-[10px] text-amber-600/90 italic mt-0.5">* Giá tham khảo</span>
           </div>
           <button
             onClick={handleAddToCart}

@@ -73,6 +73,11 @@ export function CartSummary() {
             </button>
         </div>
 
+        <div className="mt-4 flex flex-col gap-1.5 rounded-md bg-amber-500/10 p-3 border border-amber-500/20 text-[11px] text-amber-600/90 dark:text-amber-500/90">
+            <span className="font-bold uppercase tracking-wide">* Lưu ý về Giá:</span>
+            <p>Giá hiển thị trên website chỉ mang tính chất <strong>tham khảo</strong> để định mức ngân sách. Tổng chi phí cuối cùng, bao gồm cước vận chuyển thực tế và các mức chiết khấu sỉ, sẽ được chuyên viên kinh doanh liên hệ và báo giá lại xác nhận với quý khách.</p>
+        </div>
+
         <div className="mt-6 flex flex-col gap-4 rounded-sm bg-muted/50 p-4 border border-border/50">
             <div className="flex gap-3">
                 <Truck className="size-5 text-primary" />

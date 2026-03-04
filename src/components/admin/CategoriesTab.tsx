@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Grid,
   Plus,
   Search,
-  CheckCircle2,
-  AlertCircle,
   Loader2,
   Trash2,
   Edit2
 } from "lucide-react";
 import { createCategory, updateCategory, deleteCategory } from "@/app/actions/category";
+import { CategoryFormModal, CategoryFormData } from "./CategoryFormModal";
 
 interface CategoryData {
   id: string;
@@ -22,14 +23,14 @@ interface CategoryData {
 }
 
 export function CategoriesTab({ initialCategories }: { initialCategories: CategoryData[] }) {
+  const router = useRouter();
   const [categories, setCategories] = useState(initialCategories);
   const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [actionMsg, setActionMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [initialData, setInitialData] = useState<{ name: string; description: string } | null>(null);
 
   const filtered = categories.filter((c) =>
     search === "" || c.name.toLowerCase().includes(search.toLowerCase())
@@ -37,41 +38,36 @@ export function CategoriesTab({ initialCategories }: { initialCategories: Catego
 
   const handleOpenCreate = () => {
     setEditingId(null);
-    setFormData({ name: "", description: "" });
+    setInitialData(null);
     setShowModal(true);
   };
 
   const handleOpenEdit = (cat: CategoryData) => {
     setEditingId(cat.id);
-    setFormData({ name: cat.name, description: cat.description || "" });
+    setInitialData({ name: cat.name, description: cat.description || "" });
     setShowModal(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
+  const handleSubmit = async (data: CategoryFormData) => {
+    let result;
+    if (editingId) {
+      result = await updateCategory(editingId, { name: data.name, description: data.description });
+    } else {
+      result = await createCategory({ name: data.name, description: data.description });
+    }
 
-    startTransition(async () => {
-      let result;
+    if (result.success && "category" in result && result.category) {
+      toast.success(editingId ? "Đã cập nhật Loại sản phẩm" : "Đã thêm mới Loại sản phẩm");
       if (editingId) {
-        result = await updateCategory(editingId, { name: formData.name, description: formData.description });
-      } else {
-        result = await createCategory({ name: formData.name, description: formData.description });
+        setCategories(categories.map(c => c.id === editingId ? { ...c, name: data.name, description: data.description || "" } : c));
+      } else if (result.category) {
+        setCategories([{ id: result.category.id, name: result.category.name, slug: result.category.slug, description: result.category.description || null, productsCount: 0 }, ...categories]);
       }
-
-      if (result.success && "category" in result && result.category) {
-        setActionMsg({ type: "success", text: editingId ? "Đã cập nhật Loại sản phẩm" : "Đã thêm mới Loại sản phẩm" });
-        if (editingId) {
-          setCategories(categories.map(c => c.id === editingId ? { ...c, name: formData.name, description: formData.description } : c));
-        } else if (result.category) {
-          setCategories([{ id: result.category.id, name: result.category.name, slug: result.category.slug, description: result.category.description, productsCount: 0 }, ...categories]);
-        }
-        setShowModal(false);
-      } else {
-        setActionMsg({ type: "error", text: result.error || "Có lỗi xảy ra" });
-      }
-      setTimeout(() => setActionMsg(null), 3000);
-    });
+      setShowModal(false);
+      router.refresh();
+    } else {
+      toast.error(result.error || "Có lỗi xảy ra");
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -81,31 +77,36 @@ export function CategoriesTab({ initialCategories }: { initialCategories: Catego
       const result = await deleteCategory(id);
       if (result.success) {
         setCategories(categories.filter(c => c.id !== id));
-        setActionMsg({ type: "success", text: "Đã xoá loại sản phẩm" });
+        toast.success("Đã xoá loại sản phẩm");
+        router.refresh();
       } else {
-        setActionMsg({ type: "error", text: result.error || "Không thể xoá" });
+        toast.error(result.error || "Không thể xoá");
       }
-      setTimeout(() => setActionMsg(null), 3000);
     });
   };
 
   return (
     <div className="flex flex-col gap-5">
-      {actionMsg && (
-        <div className={`flex items-center gap-2 p-3 rounded-lg text-sm font-medium ${actionMsg.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-          {actionMsg.type === "success" ? <CheckCircle2 className="size-4" /> : <AlertCircle className="size-4" />}
-          {actionMsg.text}
-        </div>
-      )}
-
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
         <div className="relative flex-1 max-w-md">
+          <label htmlFor="search-category" className="sr-only">Tìm kiếm loại sản phẩm</label>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-          <input type="text" placeholder="Tìm kiếm loại sản phẩm..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+          <input 
+            id="search-category"
+            type="text" 
+            placeholder="Tìm kiếm loại sản phẩm..." 
+            value={search} 
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-lg border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" 
+            aria-label="Tìm kiếm loại sản phẩm"
+          />
         </div>
-        <button onClick={handleOpenCreate} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm shrink-0">
-          <Plus className="size-4" /> Thêm Loại Mới
+        <button 
+          onClick={handleOpenCreate} 
+          className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm shrink-0"
+          aria-label="Thêm loại sản phẩm mới"
+        >
+          <Plus className="size-4" aria-hidden="true" /> Thêm Loại Mới
         </button>
       </div>
 
@@ -114,10 +115,10 @@ export function CategoriesTab({ initialCategories }: { initialCategories: Catego
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50/80">
-                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400">Tên Loại</th>
-                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400">Mô Tả</th>
-                <th className="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-gray-400">Số Sản Phẩm</th>
-                <th className="px-5 py-3 text-right"></th>
+                <th scope="col" className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400">Tên Loại</th>
+                <th scope="col" className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400">Mô Tả</th>
+                <th scope="col" className="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-gray-400">Số Sản Phẩm</th>
+                <th scope="col" className="px-5 py-3 text-right"><span className="sr-only">Hành động</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -126,7 +127,7 @@ export function CategoriesTab({ initialCategories }: { initialCategories: Catego
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <Grid className="size-4" />
+                        <Grid className="size-4" aria-hidden="true" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-gray-900">{cat.name}</p>
@@ -138,11 +139,22 @@ export function CategoriesTab({ initialCategories }: { initialCategories: Catego
                   <td className="px-5 py-3.5 text-right text-sm font-bold text-gray-900">{cat.productsCount}</td>
                   <td className="px-5 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => handleOpenEdit(cat)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Chỉnh sửa">
-                        <Edit2 className="size-4" />
+                      <button 
+                        onClick={() => handleOpenEdit(cat)} 
+                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        title="Chỉnh sửa"
+                        aria-label={`Chỉnh sửa ${cat.name}`}
+                      >
+                        <Edit2 className="size-4" aria-hidden="true" />
                       </button>
-                      <button onClick={() => handleDelete(cat.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Xoá" disabled={cat.productsCount > 0}>
-                        <Trash2 className="size-4" />
+                      <button 
+                        onClick={() => handleDelete(cat.id)} 
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500" 
+                        title="Xoá" 
+                        disabled={cat.productsCount > 0 || isPending}
+                        aria-label={`Xoá ${cat.name}`}
+                      >
+                        {isPending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" aria-hidden="true" />}
                       </button>
                     </div>
                   </td>
@@ -156,35 +168,13 @@ export function CategoriesTab({ initialCategories }: { initialCategories: Catego
         </div>
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-bold text-gray-900">{editingId ? "Sửa Loại Sản Phẩm" : "Thêm Loại Sản Phẩm"}</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5">Tên Loại *</label>
-                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5">Mô tả (tuỳ chọn)</label>
-                <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3}
-                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none" />
-              </div>
-              <div className="mt-4 flex items-center justify-end gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">Huỷ</button>
-                <button type="submit" disabled={isPending || !formData.name.trim()} className="flex items-center gap-2 px-6 py-2 rounded-lg bg-primary text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                  {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-                  Lưu
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <CategoryFormModal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)}
+        onSubmit={handleSubmit}
+        initialData={initialData}
+        isEditing={!!editingId}
+      />
     </div>
   );
 }

@@ -64,6 +64,11 @@ export function ProductInfo({
           </span>
           <span className="text-muted-foreground font-medium">/ {unit}</span>
         </div>
+
+        <div className="rounded-md bg-amber-500/10 p-3 border border-amber-500/20 text-[11px] text-amber-600/90 dark:text-amber-500/90">
+            <span className="font-bold uppercase tracking-wide">* Lưu ý:</span>
+            {" "}Giá hiển thị chỉ mang tính chất <strong>tham khảo</strong>. Đơn giá thực tế có thể thay đổi tùy thuộc vào số lượng đặt hàng, chiết khấu và cước vận chuyển đến công trình. Vui lòng thêm vào giỏ hàng và gửi Yêu Cầu Báo Giá để nhận giá tốt nhất.
+        </div>
         {coverage && (
           <div className="bg-muted/50 p-3 rounded-lg border border-border flex gap-2 items-start">
             <Info className="text-muted-foreground mt-0.5 size-5 flex-shrink-0" />
