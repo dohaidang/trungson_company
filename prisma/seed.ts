@@ -76,7 +76,13 @@ async function main() {
     ];
 
     console.log('Inserting Categories...');
-    await prisma.category.createMany({ data: categoriesData });
+    for (const data of categoriesData) {
+        await prisma.category.upsert({
+            where: { slug: data.slug },
+            update: {},
+            create: data
+        });
+    }
     const categories = await prisma.category.findMany();
 
     const appsData = [
@@ -87,7 +93,13 @@ async function main() {
     ];
 
     console.log('Inserting Applications...');
-    await prisma.application.createMany({ data: appsData });
+    for (const data of appsData) {
+        await prisma.application.upsert({
+            where: { slug: data.slug },
+            update: {},
+            create: data
+        });
+    }
     const applications = await prisma.application.findMany();
 
     console.log('✅ Categories and Applications created');
@@ -188,6 +200,54 @@ async function main() {
                 { minQuantity: 0, maxQuantity: 999, unitPrice: 2100 },
                 { minQuantity: 1000, maxQuantity: 4999, unitPrice: 1900 },
                 { minQuantity: 5000, maxQuantity: null, unitPrice: 1750 },
+            ],
+        },
+        {
+            name: 'Gạch Ống 4 Lỗ',
+            slug: 'gach-ong-4-lo',
+            description: 'Gạch ống 4 lỗ vuông, lỗ tròn, trọng lượng nhẹ dùng xây tường bao hoặc tường ngăn.',
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-lo')?.id,
+            applicationSlugs: ['xay-tho', 'vach-ngan'],
+            dimensions: '8x8x18cm',
+            weight: 1.2,
+            compressiveStrength: 3.5,
+            priceTiers: [
+                { minQuantity: 0, maxQuantity: 999, unitPrice: 1200 },
+                { minQuantity: 1000, maxQuantity: 4999, unitPrice: 1100 },
+                { minQuantity: 5000, maxQuantity: null, unitPrice: 1050 },
+            ],
+        },
+        {
+            name: 'Gạch Nhẹ Khí Chưng Áp AAC',
+            slug: 'gach-nhe-aac',
+            description: 'Bê tông khí chưng áp siêu nhẹ, cách nhiệt tuyệt vời, chống cháy lan. Thi công rất nhanh.',
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-block')?.id,
+            applicationSlugs: ['vach-ngan'],
+            dimensions: '60x20x10cm',
+            weight: 8.0,
+            compressiveStrength: 4.0,
+            priceTiers: [
+                { minQuantity: 0, maxQuantity: 499, unitPrice: 12500 },
+                { minQuantity: 500, maxQuantity: 1999, unitPrice: 11500 },
+                { minQuantity: 2000, maxQuantity: null, unitPrice: 10500 },
+            ],
+        },
+        {
+            name: 'Ngói Màu Rêu Cao Cấp',
+            slug: 'ngoi-mau-reu',
+            description: 'Ngói lợp mái màu rêu độc quyền, chống thấm tuyệt đối, bền màu dưới tác động thời tiết khắc nghiệt.',
+            type: null,
+            categoryId: categories.find(c => c.slug === 'gach-trang-tri')?.id,
+            applicationSlugs: ['op-lat-ngoai-troi'],
+            dimensions: '42x33cm',
+            weight: 3.2,
+            compressiveStrength: 10.0,
+            priceTiers: [
+                { minQuantity: 0, maxQuantity: 999, unitPrice: 15000 },
+                { minQuantity: 1000, maxQuantity: 4999, unitPrice: 13500 },
+                { minQuantity: 5000, maxQuantity: null, unitPrice: 12000 },
             ],
         },
     ];
