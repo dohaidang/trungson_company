@@ -18,7 +18,6 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   // Type transformation for form component
   const initialData = {
     name: product.name,
-    type: product.type,
     description: product.description,
     dimensions: product.dimensions,
     weight: product.weight,
@@ -26,6 +25,9 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     isPublished: product.isPublished,
     priceTiers: product.priceTiers,
     images: product.images,
+    categoryId: product.categoryId,
+    applicationIds: product.applicationIds,
+    stock: product.stock ?? 0,
   };
 
   return <ProductForm mode="edit" productId={product.id} initialData={initialData} />;

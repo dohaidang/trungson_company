@@ -140,7 +140,7 @@ export async function getUserOrders(status?: string) {
                 items: {
                     include: {
                         product: {
-                            select: { name: true, slug: true, type: true },
+                            select: { name: true, slug: true },
                         },
                     },
                 },
