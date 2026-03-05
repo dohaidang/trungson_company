@@ -44,3 +44,5 @@ next-env.d.ts
 
 .agent/
 gemini.md
+.vercel
+.env*.local
