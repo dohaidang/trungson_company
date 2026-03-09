@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, Menu, Home, X, Search } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
+import { SearchBar } from "./SearchBar";
 
 export function Header({ settings }: { settings?: Record<string, string> }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,10 +53,15 @@ export function Header({ settings }: { settings?: Record<string, string> }) {
 
           {/* Actions */}
           <div className="flex flex-1 items-center justify-end gap-3">
-            {/* Search */}
+            {/* Search Bar - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-sm justify-end mr-2">
+              <SearchBar />
+            </div>
+
+            {/* Mobile Search Icon Toggle */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="hidden md:flex h-10 w-10 items-center justify-center rounded text-foreground hover:text-primary transition-colors"
+              className="md:hidden flex h-10 w-10 items-center justify-center rounded text-foreground hover:text-primary transition-colors"
             >
               <Search className="size-5" />
             </button>

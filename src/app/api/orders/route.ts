@@ -21,7 +21,7 @@ export async function GET(request: Request) {
                 items: {
                     include: {
                         product: {
-                            select: { name: true, slug: true, type: true },
+                            select: { name: true, slug: true },
                         },
                     },
                 },

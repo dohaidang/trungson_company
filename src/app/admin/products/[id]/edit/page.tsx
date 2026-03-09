@@ -18,12 +18,14 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   // Type transformation for form component
   const initialData = {
     name: product.name,
-    type: product.type,
+    categoryId: product.categoryId,
     description: product.description,
     dimensions: product.dimensions,
     weight: product.weight,
     compressiveStrength: product.compressiveStrength,
     isPublished: product.isPublished,
+    applicationIds: product.applicationIds,
+    stock: product.stock,
     priceTiers: product.priceTiers,
     images: product.images,
   };

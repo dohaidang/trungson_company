@@ -19,7 +19,7 @@ export async function GET(
                 items: {
                     include: {
                         product: {
-                            select: { name: true, slug: true, type: true, dimensions: true },
+                            select: { name: true, slug: true, dimensions: true },
                         },
                     },
                 },
