@@ -30,11 +30,14 @@ import {
   Mail,
   Grid,
   Layers,
+  Download,
 } from "lucide-react";
 import { updateOrderStatus, toggleProductPublish, deleteProduct, deleteUser, toggleContactReadStatus, deleteContact } from "@/app/actions/admin";
 import { CategoriesTab } from "./CategoriesTab";
 import { ApplicationsTab } from "./ApplicationsTab";
 import { SettingsTab } from "./SettingsTab";
+import { RevenueChart } from "./RevenueChart";
+import { TopProductsTable } from "./TopProductsTable";
 
 // ===== TYPES =====
 interface StatsData {
@@ -43,6 +46,13 @@ interface StatsData {
   totalProducts: number;
   unreadContacts: number;
   revenue: number;
+  revenueComparison?: {
+    currentPeriod: number;
+    previousPeriod: number;
+    percentage: number;
+  };
+  revenueChart?: { date: string; revenue: number; orders: number }[];
+  topProducts?: { id: string; name: string; totalSold: number; revenue: number }[];
   ordersByStatus: { status: string; count: number }[];
   recentOrders: {
     id: string;
@@ -358,6 +368,42 @@ function OverviewTab({ stats, orders, users, setActiveTab }: { stats: StatsData 
         ))}
       </div>
 
+      {/* ===== MỞ RỘNG BIỂU ĐỒ & TOP PRODUCTS ====== */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              Biểu Đồ Doanh Thu & Đơn Hàng (30 Ngày)
+            </h3>
+            {stats.revenueComparison && (
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                  stats.revenueComparison.percentage >= 0 
+                  ? "bg-emerald-100 text-emerald-700" 
+                  : "bg-red-100 text-red-700"
+              }`}>
+                  {stats.revenueComparison.percentage >= 0 ? "+" : ""}{stats.revenueComparison.percentage}% so với 30 ngày trước
+              </span>
+            )}
+          </div>
+          <div className="h-[320px] w-full">
+            {stats.revenueChart && <RevenueChart data={stats.revenueChart} />}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <Package className="w-5 h-5 text-amber-600" />
+              Top Bán Chạy Nhất (30 Ngày)
+            </h3>
+          </div>
+          <div className="flex-1 overflow-auto">
+            {stats.topProducts && <TopProductsTable products={stats.topProducts} />}
+          </div>
+        </div>
+      </div>
+
       {/* Order Status breakdown + Notifications */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         <div className="xl:col-span-3 bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
@@ -587,6 +633,37 @@ function OrdersTab({ orders }: { orders: OrderData[] }) {
     });
   };
 
+  const handleExportCSV = () => {
+    if (filtered.length === 0) return;
+
+    // Create CSV content with UTF-8 BOM for Excel matching Vietnamese
+    const BOM = "\uFEFF";
+    let csvContent = BOM + "Mã ĐH,Khách Hàng,SĐT/Email,Sản Phẩm,Trạng Thái,Ngày,Tổng Tiền\n";
+
+    filtered.forEach(order => {
+      // Escape strings containing commas/newlines by wrapping them in double quotes
+      const cleanId = order.id.slice(0, 12);
+      const cleanCustomer = `"${order.customer.replace(/"/g, '""')}"`;
+      const cleanEmail = `"${order.email.replace(/"/g, '""')}"`;
+      const cleanItems = `"${order.items.replace(/"/g, '""')}"`;
+      const cleanStatus = `"${STATUS_MAP[order.status]?.label || order.status}"`;
+      const cleanDate = `"${order.date}"`;
+      const cleanTotal = order.total; // Amount 
+
+      csvContent += `${cleanId},${cleanCustomer},${cleanEmail},${cleanItems},${cleanStatus},${cleanDate},${cleanTotal}\n`;
+    });
+
+    // Create a Blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `bao-cao-don-hang-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex flex-col gap-5">
       {actionMsg && (
@@ -604,7 +681,15 @@ function OrdersTab({ orders }: { orders: OrderData[] }) {
           <input type="text" placeholder="Tìm theo mã ĐH hoặc tên khách..." value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
         </div>
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap items-center">
+          <button 
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 rounded-lg bg-green-600 hover:bg-green-700 text-white px-3 py-2 text-xs font-bold transition-all shadow-sm mr-2"
+          >
+            <Download className="size-3.5" />
+            Xuất CSV
+          </button>
+          
           {[
             { key: "all", label: "Tất cả" },
             { key: "pending", label: "Chờ xử lý" },

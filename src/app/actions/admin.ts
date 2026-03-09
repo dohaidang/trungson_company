@@ -59,6 +59,74 @@ export async function getAdminStats() {
             }),
         ]);
 
+        // ==========================================
+        // TÍNH TOÁN BÁO CÁO NÂNG CAO
+        // ==========================================
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+        const recentCompletedOrdersForStats = await prisma.order.findMany({
+            where: {
+                status: 'COMPLETED',
+                createdAt: { gte: sixtyDaysAgo }
+            },
+            include: {
+                items: {
+                    include: { product: { select: { id: true, name: true } } }
+                }
+            }
+        });
+
+        // 1. So Sánh Doanh Thu (Tháng này vs Tháng trước)
+        const currentPeriodOrders = recentCompletedOrdersForStats.filter((o: any) => o.createdAt >= thirtyDaysAgo);
+        const previousPeriodOrders = recentCompletedOrdersForStats.filter((o: any) => o.createdAt < thirtyDaysAgo);
+
+        const currentRevenue = currentPeriodOrders.reduce((sum: number, o: any) => sum + o.totalAmount, 0);
+        const previousRevenue = previousPeriodOrders.reduce((sum: number, o: any) => sum + o.totalAmount, 0);
+
+        let revenuePercentage = 0;
+        if (previousRevenue === 0 && currentRevenue > 0) revenuePercentage = 100;
+        else if (previousRevenue > 0) revenuePercentage = Math.round(((currentRevenue - previousRevenue) / previousRevenue) * 100);
+
+        // 2. Dữ liệu Biểu đồ (30 ngày qua)
+        const chartDataMap = new Map();
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+            chartDataMap.set(dateStr, { date: dateStr, revenue: 0, orders: 0 });
+        }
+
+        currentPeriodOrders.forEach((o: any) => {
+            const dateStr = `${o.createdAt.getDate().toString().padStart(2, '0')}/${(o.createdAt.getMonth() + 1).toString().padStart(2, '0')}`;
+            if (chartDataMap.has(dateStr)) {
+                const entry = chartDataMap.get(dateStr);
+                entry.revenue += o.totalAmount;
+                entry.orders += 1;
+            }
+        });
+        const revenueChart = Array.from(chartDataMap.values());
+
+        // 3. Top Sản Phẩm Bán Chạy Nhất (Trong 30 ngày)
+        const productStats = new Map();
+        currentPeriodOrders.forEach((o: any) => {
+            o.items.forEach((item: any) => {
+                if (!productStats.has(item.productId)) {
+                    productStats.set(item.productId, { id: item.productId, name: item.product.name, totalSold: 0, revenue: 0 });
+                }
+                const p = productStats.get(item.productId);
+                p.totalSold += item.quantity;
+                p.revenue += item.quantity * item.unitPrice;
+            });
+        });
+        const topProducts = Array.from(productStats.values())
+            .sort((a, b) => b.totalSold - a.totalSold)
+            .slice(0, 5);
+        // ==========================================
+
         return {
             stats: {
                 totalUsers,
@@ -66,6 +134,13 @@ export async function getAdminStats() {
                 totalProducts,
                 unreadContacts: totalContacts,
                 revenue: revenueTotal._sum.totalAmount || 0,
+                revenueComparison: {
+                    currentPeriod: currentRevenue,
+                    previousPeriod: previousRevenue,
+                    percentage: revenuePercentage
+                },
+                revenueChart,
+                topProducts,
                 ordersByStatus: ordersByStatus.map(s => ({
                     status: s.status,
                     count: s._count.id,
@@ -74,7 +149,7 @@ export async function getAdminStats() {
                     id: o.id,
                     customer: o.user.name || o.user.email,
                     email: o.user.email,
-                    items: o.items.map(i => `${i.product.name} ×${i.quantity}`).join(', '),
+                    items: o.items.map((i: any) => `${i.product.name} ×${i.quantity}`).join(', '),
                     total: o.totalAmount,
                     status: o.status.toLowerCase(),
                     date: o.createdAt.toLocaleDateString('vi-VN'),
