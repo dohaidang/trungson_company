@@ -90,7 +90,7 @@ export function SearchBar() {
         <form 
             ref={searchRef}
             onSubmit={handleSubmit} 
-            className="relative w-full max-w-sm hidden md:block" // Tạm ẩn trên mobile để giữ thiết kế đơn giản
+            className="relative w-full hidden lg:block" // Ẩn hoàn toàn trên mobile để giữ thiết kế đơn giản
         >
             <div className="relative group text-slate-700">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />

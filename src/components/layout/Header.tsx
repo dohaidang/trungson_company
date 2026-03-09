@@ -28,7 +28,7 @@ export function Header({ settings }: { settings?: Record<string, string> }) {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm support-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <div className="flex flex-1">
+          <div className="flex flex-shrink-0">
             <Link href="/" className="flex items-center gap-3">
               <div className="flex size-8 items-center justify-center rounded bg-primary text-primary-foreground">
                 <Home className="size-5" />
@@ -42,8 +42,8 @@ export function Header({ settings }: { settings?: Record<string, string> }) {
             </Link>
           </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex flex-none items-center justify-center gap-8">
+          {/* Desktop Nav - Cho phép padding lỏng, không fix cứng width thay vì flex-none */}
+          <nav className="hidden xl:flex flex-1 items-center justify-center gap-6 2xl:gap-8 px-4">
             <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">Trang Chủ</Link>
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">Giới Thiệu</Link>
             <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Sản Phẩm</Link>
@@ -52,9 +52,9 @@ export function Header({ settings }: { settings?: Record<string, string> }) {
           </nav>
 
           {/* Actions */}
-          <div className="flex flex-1 items-center justify-end gap-3">
+          <div className="flex flex-shrink-0 items-center justify-end gap-2 sm:gap-4">
             {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-sm justify-end mr-2">
+            <div className="hidden lg:flex w-full xl:w-[260px] 2xl:w-[320px] justify-end">
               <SearchBar />
             </div>
 
