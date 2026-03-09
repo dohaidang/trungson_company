@@ -24,6 +24,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
+                console.log('authorize called with:', credentials);
                 const parsedCredentials = z
                     .object({ email: z.string().email(), password: z.string().min(6) })
                     .safeParse(credentials);
@@ -31,11 +32,16 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
                     const user = await getUser(email);
+                    console.log('User fetched from DB:', user ? user.email : 'NOT FOUND');
                     if (!user) return null;
 
-                    if (!user.password) return null;
+                    if (!user.password) {
+                        console.log('User has no password');
+                        return null;
+                    }
 
                     const passwordsMatch = await bcrypt.compare(password, user.password);
+                    console.log('Password match:', passwordsMatch);
 
                     if (passwordsMatch) {
                         return {
@@ -46,9 +52,11 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                             image: user.image,
                         };
                     }
+                } else {
+                    console.log('Zod validation failed:', parsedCredentials.error);
                 }
 
-                console.log('Invalid credentials');
+                console.log('Invalid credentials fallback');
                 return null;
             },
         }),

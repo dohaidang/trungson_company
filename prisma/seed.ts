@@ -76,7 +76,13 @@ async function main() {
     ];
 
     console.log('Inserting Categories...');
-    await prisma.category.createMany({ data: categoriesData });
+    for (const c of categoriesData) {
+        await prisma.category.upsert({
+            where: { slug: c.slug },
+            update: { name: c.name, description: c.description },
+            create: c,
+        });
+    }
     const categories = await prisma.category.findMany();
 
     const appsData = [
@@ -87,7 +93,13 @@ async function main() {
     ];
 
     console.log('Inserting Applications...');
-    await prisma.application.createMany({ data: appsData });
+    for (const a of appsData) {
+        await prisma.application.upsert({
+            where: { slug: a.slug },
+            update: { name: a.name, description: a.description },
+            create: a,
+        });
+    }
     const applications = await prisma.application.findMany();
 
     console.log('✅ Categories and Applications created');
