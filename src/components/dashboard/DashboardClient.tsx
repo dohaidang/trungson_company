@@ -23,6 +23,7 @@ import {
   Loader2,
   AlertCircle,
   PackageCheck,
+  ChevronRight,
 } from "lucide-react";
 import { updateProfile, changePassword } from "@/app/actions/user";
 import { cancelOrder } from "@/app/actions/order";
@@ -193,12 +194,17 @@ function OverviewTab({ userName, orders }: { userName: string; orders: OrderData
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 truncate">{order.items}</p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-primary">{order.total.toLocaleString()}đ</p>
-                    <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
-                      <Calendar className="size-3" />
-                      {order.date}
-                    </p>
+                  <div className="text-right shrink-0 flex flex-col items-end gap-2">
+                    <div>
+                      <p className="text-sm font-bold text-primary">{order.total.toLocaleString()}đ</p>
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
+                        <Calendar className="size-3" />
+                        {order.date}
+                      </p>
+                    </div>
+                    <Link href={`/dashboard/orders/${order.id}`} className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                      Chi tiết <ChevronRight className="size-3" />
+                    </Link>
                   </div>
                 </div>
               );
@@ -304,15 +310,23 @@ function OrdersTab({ orders }: { orders: OrderData[] }) {
                     {order.total.toLocaleString()}đ
                   </td>
                   <td className="px-5 py-4 text-right">
-                    {order.status === "pending" && (
-                      <button
-                        onClick={() => handleCancel(order.id)}
-                        disabled={isPending}
-                        className="text-xs font-bold text-destructive hover:text-destructive/80 disabled:opacity-50"
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/dashboard/orders/${order.id}`}
+                        className="text-xs font-bold text-primary hover:text-primary/80 flex items-center gap-1"
                       >
-                        {isPending ? <Loader2 className="size-4 animate-spin" /> : "Hủy"}
-                      </button>
-                    )}
+                        <Eye className="size-3" /> Xem
+                      </Link>
+                      {order.status === "pending" && (
+                        <button
+                          onClick={() => handleCancel(order.id)}
+                          disabled={isPending}
+                          className="text-xs font-bold text-destructive hover:text-destructive/80 disabled:opacity-50"
+                        >
+                          {isPending ? <Loader2 className="size-4 animate-spin" /> : "Hủy"}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

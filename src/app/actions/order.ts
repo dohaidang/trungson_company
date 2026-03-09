@@ -11,6 +11,9 @@ const createOrderSchema = z.object({
         productId: z.string(),
         quantity: z.number().int().positive(),
     })).min(1, 'Cần ít nhất 1 sản phẩm'),
+    customerName: z.string().min(2, 'Họ tên quá ngắn').optional(),
+    customerPhone: z.string().min(10, 'Số điện thoại không hợp lệ').optional(),
+    notes: z.string().optional(),
     deliveryAddress: z.string().min(5, 'Địa chỉ giao hàng quá ngắn'),
     deliveryMethod: z.enum(['CRANE', 'MANUAL']).default('CRANE'),
     roadWidthLimit: z.number().optional(),
@@ -30,7 +33,7 @@ export async function createOrder(data: z.infer<typeof createOrderSchema>) {
             return { order: null, error: firstIssue };
         }
 
-        const { items, deliveryAddress, deliveryMethod, roadWidthLimit } = result.data;
+        const { items, customerName, customerPhone, notes, deliveryAddress, deliveryMethod, roadWidthLimit } = result.data;
 
         // Fetch products and calculate prices
         const productIds = items.map(i => i.productId);
@@ -63,6 +66,9 @@ export async function createOrder(data: z.infer<typeof createOrderSchema>) {
         const order = await prisma.order.create({
             data: {
                 userId: session.user.id,
+                customerName: customerName || session.user.name,
+                customerPhone,
+                notes,
                 deliveryAddress,
                 deliveryMethod: deliveryMethod as 'CRANE' | 'MANUAL',
                 roadWidthLimit,

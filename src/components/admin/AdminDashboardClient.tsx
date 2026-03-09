@@ -495,7 +495,12 @@ function OverviewTab({ stats, orders, users, setActiveTab }: { stats: StatsData 
                         <st.icon className="size-3" />{st.label}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-right text-sm font-bold text-gray-900">{order.total.toLocaleString()}đ</td>
+                    <td className="px-6 py-3.5 text-right text-sm font-bold text-gray-900 flex justify-end items-center gap-3">
+                      <span>{order.total.toLocaleString()}đ</span>
+                      <Link href={`/dashboard/orders/${order.id}`} className="text-gray-400 hover:text-primary transition-colors">
+                        <Eye className="size-4" />
+                      </Link>
+                    </td>
                   </tr>
                 );
               })}
@@ -737,7 +742,12 @@ function OrdersTab({ orders }: { orders: OrderData[] }) {
                         <st.icon className="size-3" />{st.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-right text-sm font-bold text-primary">{order.total.toLocaleString()}đ</td>
+                    <td className="px-5 py-3.5 text-right text-sm font-bold text-primary flex items-center justify-end gap-3">
+                      <span>{order.total.toLocaleString()}đ</span>
+                      <Link href={`/dashboard/orders/${order.id}`} className="text-gray-400 hover:text-primary transition-colors">
+                        <Eye className="size-4" />
+                      </Link>
+                    </td>
                     <td className="px-5 py-3.5 text-right">
                       {order.status === "pending" && (
                         <button onClick={() => handleStatusChange(order.id, "CONFIRMED")} disabled={isPending}
